@@ -1,0 +1,29 @@
+//TECN132V JOB NOTIFY=&SYSUID                                           00010003
+//*STEPS TO CREATE KSDS DATASETS                                        00011002
+//STEP1    EXEC PGM=IDCAMS                                              00020000
+//SYSPRINT DD SYSOUT=*                                                  00030000
+//SYSOUT   DD SYSOUT=*                                                  00040000
+//SYSIN    DD *                                                         00050000
+  DEFINE CLUSTER(NAME(TECN132.L1B.STUDENT.REFER.KSDS) -                 00060000
+         KEYS(6,0) -                                                    00070000
+         RECORDSIZE(80,80) -                                            00080000
+         CISZ(512) -                                                    00090000
+         FREESPACE(10,10) -                                             00100000
+         TRACKS(5,5) -                                                  00110000
+         VOLUME(ZAPRD7) -                                               00120000
+         INDEXED)                                                       00130000
+/*                                                                      00140000
+//STEP2    EXEC PGM=IDCAMS                                              00150000
+//SYSPRINT DD SYSOUT=*                                                  00160000
+//SYSOUT   DD SYSOUT=*                                                  00170000
+//SYSIN    DD *                                                         00180000
+  DEFINE CLUSTER(NAME(TECN132.L1B.STUDENT.OUTPUT.KSDS) -                00181000
+         KEYS(6,0) -                                                    00182000
+         RECORDSIZE(80,80) -                                            00183000
+         CISZ(512) -                                                    00184000
+         FREESPACE(10,10) -                                             00185000
+         TRACKS(5,5) -                                                  00186000
+         VOLUME(ZAPRD7) -                                               00187000
+         INDEXED)                                                       00188000
+/*                                                                      00190000
+

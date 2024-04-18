@@ -1,0 +1,8 @@
+//TECN132R JOB NOTIFY=&SYSUID                                           00010002
+//RUN EXEC PGM=ICT02CBM                       --> MEMBER NAME           00040005
+//STEPLIB DD DSN=TECN132.MYLIB.LOADLIB,DISP=SHR --> LOADLIB NAME        00050004
+//SYSPRINT DD SYSOUT=*                                                  00060000
+//INPKS DD DSN=TECN132.MYDATA.ICT02.KSDS,DISP=SHR                       00080005
+//OUTPS DD DSN=TECN132.MYDATA.ICT02.PS3,DISP=SHR                        00090006
+//SYSIN DD DUMMY                                                        00100000
+

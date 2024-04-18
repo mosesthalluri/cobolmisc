@@ -1,0 +1,10 @@
+       IDENTIFICATION DIVISION.                                         00010001
+       PROGRAM-ID. CA21G132.                                            00020001
+       DATA DIVISION.                                                   00030001
+       LINKAGE SECTION.                                                 00040001
+       77 LK-MARKS PIC 9(2)V9(2).                                       00050001
+       77 LK-PERCENTAGE PIC 9(02).                                      00060002
+       PROCEDURE DIVISION USING LK-MARKS LK-PERCENTAGE.                 00070002
+              COMPUTE LK-PERCENTAGE ROUNDED = LK-MARKS * 2.             00080002
+              GOBACK.                                                   00090001
+

@@ -1,0 +1,148 @@
+--PRE DELETING TABLES                                                   00001049
+  DROP TABLE PAYMENT_DB;                                                00010046
+  DROP TABLE LOAN_DB;                                                   00020046
+  DROP TABLE APPLICANT_DB;                                              00030048
+--CREATING APPLICANT_DB TABLE                                           00031050
+  CREATE TABLE APPLICANT_DB                                             00040046
+     (                                                                  00050046
+     APPLICANT_ID CHAR(10) NOT NULL PRIMARY KEY                         00060046
+     ,APPLICANT_NAME VARCHAR(32) NOT NULL                               00070046
+     ,DOOR_NO CHAR(10)                                                  00080046
+     ,STREET CHAR(20)                                                   00090046
+     ,CITY CHAR(20)                                                     00100046
+     ,STATE CHAR(20)                                                    00110046
+     ,PIN INT                                                           00120046
+     ,CELL_PHONE_NO CHAR(10)                                            00130046
+     )IN SHRDB4.SHRTS4;                                                 00140046
+--CREATING UNIQUE INDEX FOR APPLICANT_DB                                00141050
+  CREATE UNIQUE INDEX APPDB ON APPLICANT_DB(APPLICANT_ID);              00150046
+--INSERTING DATA INTO APPLICANT_DB                                      00151050
+  INSERT INTO APPLICANT_DB                                              00160046
+  VALUES('1000000175','KORALLE BRABBINS','86','CREST LINE','LAS VEGAS', 00170046
+  'NEVADA',89178,'7022684601');                                         00180046
+  INSERT INTO APPLICANT_DB                                              00190046
+  VALUES('1000000122','LORRAYNE SCALIA','17','PRANKRATZ','TOPEKA',      00200046
+  'KANSAS',66611,'7856762538');                                         00210046
+  INSERT INTO APPLICANT_DB                                              00220046
+  VALUES('1000000077','MARYA BUTLAND','23','LAKEWOOD GARDEN','HONOLULU',00230046
+  'HAWAII',96810,'8084873497');                                         00240046
+  INSERT INTO APPLICANT_DB                                              00250046
+  VALUES('1000000181','JENNIE SEABORN','40','ELMSIDE','SAGINAW',        00260046
+  'MICHIGAN',48604,'9896202606');                                       00270046
+  INSERT INTO APPLICANT_DB                                              00280046
+  VALUES('1000000018','BRNABY PHIPSON','86','CHIVE','WILKES BARRE',     00290046
+  'PENNSYLVANIA',18706,'5704090518');                                   00300046
+  INSERT INTO APPLICANT_DB                                              00310046
+  VALUES('1000000123','UDELL CANFIELD','27','SPAIGHT','WICHITA',        00320046
+  'KANSAS',67236,'3164942467');                                         00330046
+  INSERT INTO APPLICANT_DB                                              00340046
+  VALUES('1000000039','HARRIOTT TRAMMEL','48','RANDY','JAMAICA',        00350046
+  'NEW YORK',11470,'7184322645');                                       00360046
+  INSERT INTO APPLICANT_DB                                              00370046
+  VALUES('1000000064','JOBYE DURRANS','49','VEITH','SEATTLE',           00380046
+  'WASHINGTON',98140,'4258395814');                                     00390046
+  INSERT INTO APPLICANT_DB                                              00400046
+  VALUES('1000000027','DAMON STEGERS','72','OLD SHORE','TUCSON',        00410046
+  'ARIZONA',85705,'5204784349');                                        00420046
+  INSERT INTO APPLICANT_DB                                              00430046
+  VALUES('1000000057','LORIANNE MACASKIE','75','CRESCENT OAKS',         00440046
+  'NORCROSS','GEORGIA',30092,'4042686199');                             00450046
+  INSERT INTO APPLICANT_DB                                              00460046
+  VALUES('1000000106','VITTORIA BORRILL','82','MOULTON',                00470046
+  'ANN ARBOR','MICHIGAN',48107,'7344326524');                           00480046
+  INSERT INTO APPLICANT_DB                                              00490046
+  VALUES('1000000082','DORENA WHYFFEN','06','HANOVER',                  00500046
+  'BIRMINGHAM','ALABAMA',35210,'3348530343');                           00510046
+--VIEWING CREATED TABLE                                                 00511050
+  SELECT * FROM APPLICANT_DB;                                           00520046
+  CREATE TABLE LOAN_DB                                                  00530046
+     (                                                                  00540046
+     APPLICANT_ID              CHAR(10) NOT NULL PRIMARY KEY            00550046
+     ,LOAN_ID                  CHAR(2)NOT NULL                          00560046
+     ,LOAN_TYPE                CHAR(10)NOT NULL                         00570046
+     ,APPROVED_LOAN_AMOUNT     INT NOT NULL                             00580046
+     ,LOAN_APPROVAL_DATE       DATE                                     00590046
+     ,LOAN_TENURE              CHAR(2) NOT NULL                         00600046
+     ,FIXED_INTEREST_RATE      DECIMAL(3,1)NOT NULL                     00610046
+     ,LOAN_INDICATOR           CHAR(5) NOT NULL                         00620046
+     ,RE_PAYMENT_DAY           CHAR(2) NOT NULL                         00630046
+     ,TOTAL_REPAYMENT_AMOUNT   INT NOT NULL                             00640046
+     ,MONTHLY_REPAYMENT_AMOUNT DECIMAL(9,2) NOT NULL                    00650046
+     ,NEXT_REPAYMENT_DUE_DATE  DATE NOT NULL                            00660046
+     ,BALANCE_AMOUNT           DECIMAL(9,2)                             00670046
+     )IN SHRDB4.SHRTS4;                                                 00680046
+  CREATE UNIQUE INDEX IDXL2 ON LOAN_DB(APPLICANT_ID);                   00690046
+  INSERT INTO LOAN_DB                                                   00700046
+  VALUES ('1000000175','01','HOUSING',1000000,'2020-06-08','05',9.0,    00710046
+          'OPEN','08',1450000,24166.66,'2024-03-08',362500.00);         00720046
+  INSERT INTO LOAN_DB                                                   00730046
+  VALUES ('1000000122','01','HOUSING',2000000,'2013-05-15','07',8.0,    00740046
+          'CLOSE','15',3120000,37142.85,'2024-03-15',1708571.43);       00750046
+  INSERT INTO LOAN_DB                                                   00760046
+  VALUES ('1000000077','03','CAR',1200000,'2015-05-26','11',11.0,       00770046
+          'OPEN','26',2652000,20090.90,'2024-03-26',522363.64);         00780046
+  INSERT INTO LOAN_DB                                                   00790046
+  VALUES ('1000000181','01','HOUSING',2500000,'2016-05-17','15',6.0,    00800046
+          'OPEN','17',4750000,26388.88,'2024-03-17',2269444.44);        00810046
+  INSERT INTO LOAN_DB                                                   00820046
+  VALUES ('1000000018','01','HOUSING',50000,'2012-04-18','12',8.0,      00830046
+          'OPEN','18',98000,680.55,'2024-03-18',680.56);                00840046
+  INSERT INTO LOAN_DB                                                   00850046
+  VALUES ('1000000123','01','HOUSING',130000,'2004-04-18','20',4.0,     00860046
+          'OPEN','19',234000,975.00,'2024-03-19',975.00);               00870046
+  INSERT INTO LOAN_DB                                                   00880046
+  VALUES ('1000000039','01','HOUSING',1600000,'2013-05-20','16',8.0,    00890046
+          'OPEN','20',3648000,19000.00,'2024-03-20',1178000.00);        00900046
+  INSERT INTO LOAN_DB                                                   00910046
+  VALUES ('1000000064','01','HOUSING',1400000,'2013-09-27','08',7.0,    00920046
+          'CLOSE','27',2184000,22750.00,'2024-03-27',682500.00);        00930046
+  INSERT INTO LOAN_DB                                                   00940046
+  VALUES ('1000000027','01','HOUSING',400000,'2012-05-30','15',8.0,     00950046
+          'OPEN','30',880000,4888.88,'2024-03-30',185777.78);           00960046
+  INSERT INTO LOAN_DB                                                   00970046
+  VALUES ('1000000057','01','HOUSING',540000,'2019-12-23','07',4.0,     00980046
+          'OPEN','23',691200,8228.57,'2024-03-23',271542.86);           00990046
+  INSERT INTO LOAN_DB                                                   01000046
+  VALUES ('1000000106','04','EDUCATION',1800000,'2013-05-01','12',7.0,  01010046
+          'OPEN','01',3312000,23000.00,'2024-03-01',299000.00);         01020046
+  INSERT INTO LOAN_DB                                                   01030046
+  VALUES ('1000000082','01','HOUSING',600000,'2015-03-25','10',9.0,     01040046
+          'OPEN','25',1140000,9500.00,'2024-03-25',114000.00);          01050046
+  SELECT * FROM LOAN_DB;                                                01060046
+  CREATE TABLE PAYMENT_DB                                               01070046
+      (                                                                 01080046
+      APPLICANT_ID CHAR(10) NOT NULL PRIMARY KEY                        01090046
+     ,LOAN_ID CHAR(02) NOT NULL                                         01100046
+     ,AMOUNT_PAID DECIMAL(9,2)                                          01110046
+     ,AMOUNT_PAID_DATE DATE                                             01120046
+     ,PREVIOUS_BALANCE_AMOUNT DECIMAL(9,2)                              01130046
+     ,CURRENT_BALANCE_AMOUNT DECIMAL(9,2)                               01140046
+     ,COLLECTION CHAR(10)                                               01150046
+       )IN SHRDB4.SHRTS4;                                               01160046
+  CREATE UNIQUE INDEX IDXP5 ON PAYMENT_DB(APPLICANT_ID);                01170046
+  INSERT INTO PAYMENT_DB VALUES ('1000000175','01',1087500.00,          01180046
+   '2024-02-01',0386666.67,0362500.00,'ABC');                           01190046
+  INSERT INTO PAYMENT_DB VALUES ('1000000122','01',3120000.00,          01200046
+   '2023-02-01',0000000.00,0000000.00,'MAXRETURN');                     01210046
+  INSERT INTO PAYMENT_DB VALUES ('1000000077','03',2129636.36,          01220046
+   '2024-02-16',0542454.55,0522363.64,'GENUINE');                       01230046
+  INSERT INTO PAYMENT_DB VALUES ('1000000181','01',2480555.56,          01240046
+   '2024-02-15',2295833.33,2269444.44,'ABC');                           01250046
+  INSERT INTO PAYMENT_DB VALUES ('1000000018','01',0097319.44,          01260046
+   '2024-02-09',0001361.11,0362680.56,'HIGHSPEED');                     01270046
+  INSERT INTO PAYMENT_DB VALUES ('1000000123','01',0233025.00,          01280046
+   '2024-02-10',0001950.00,0000975.00,'ABC');                           01290046
+  INSERT INTO PAYMENT_DB VALUES ('1000000039','01',2470000.00,          01300046
+   '2024-02-12',1197000.00,1178000.00,'HIGHSPEED');                     01310046
+  INSERT INTO PAYMENT_DB VALUES ('1000000064','01',2184000.00,          01320046
+   '2024-01-01',0000000.00,0000000.00,'ABC');                           01330046
+  INSERT INTO PAYMENT_DB VALUES ('1000000027','01',0694222.22,          01340046
+   '2024-02-26',0190666.67,0185777.78,'ABC');                           01350046
+  INSERT INTO PAYMENT_DB VALUES ('1000000057','01',0419657.14,          01360046
+   '2024-02-14',0279771.43,0271542.86,'MAXRETURN');                     01370046
+  INSERT INTO PAYMENT_DB VALUES ('1000000106','04',3013000.00,          01380046
+   '2024-02-23',0322000.00,0299000.00,'GENUINE');                       01390046
+  INSERT INTO PAYMENT_DB VALUES ('1000000082','01',1026000.00,          01400046
+   '2024-02-14',0123500.00,0114000.00,'HIGHSPEED');                     01410046
+  SELECT * FROM PAYMENT_DB;                                             01420046
+

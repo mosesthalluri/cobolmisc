@@ -1,0 +1,46 @@
+      ******************************************************************
+      * DCLGEN TABLE(MEM_DET)                                          *
+      *        LIBRARY(TLAB043.MYLIB.DB2.DCLGEN(MEMDCL))               *
+      *        ACTION(REPLACE)                                         *
+      *        LANGUAGE(COBOL)                                         *
+      *        NAMES(HV1-)                                             *
+      *        QUOTE                                                   *
+      *        COLSUFFIX(YES)                                          *
+      * ... IS THE DCLGEN COMMAND THAT MADE THE FOLLOWING STATEMENTS   *
+      ******************************************************************
+           EXEC SQL DECLARE MEM_DET TABLE
+           ( MEMBER_ID                      CHAR(6) NOT NULL,
+             MEMBER_NAME                    VARCHAR(15),
+             PHONE_NO                       CHAR(6) NOT NULL,
+             CITY                           VARCHAR(15),
+             DATE_REGISTER                  DATE,
+             DATE_EXPIRE                    DATE
+           ) END-EXEC.
+      ******************************************************************
+      * COBOL DECLARATION FOR TABLE MEM_DET                            *
+      ******************************************************************
+       01  DCLMEM-DET.
+      *                       MEMBER_ID
+           10 HV1-MEMBER-ID        PIC X(6).
+           10 HV1-MEMBER-NAME.
+      *                       MEMBER_NAME LENGTH
+              49 HV1-MEMBER-NAME-LEN
+                 PIC S9(4) USAGE COMP.
+      *                       MEMBER_NAME
+              49 HV1-MEMBER-NAME-TEXT
+                 PIC X(15).
+      *                       PHONE_NO
+           10 HV1-PHONE-NO         PIC X(6).
+           10 HV1-CITY.
+      *                       CITY LENGTH
+              49 HV1-CITY-LEN      PIC S9(4) USAGE COMP.
+      *                       CITY
+              49 HV1-CITY-TEXT     PIC X(15).
+      *                       DATE_REGISTER
+           10 HV1-DATE-REGISTER    PIC X(10).
+      *                       DATE_EXPIRE
+           10 HV1-DATE-EXPIRE      PIC X(10).
+      ******************************************************************
+      * THE NUMBER OF COLUMNS DESCRIBED BY THIS DECLARATION IS 6       *
+      ******************************************************************
+

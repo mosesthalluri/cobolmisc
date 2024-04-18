@@ -1,0 +1,168 @@
+       IDENTIFICATION DIVISION.                                         00010002
+       PROGRAM-ID. CA11G132.                                            00020002
+       ENVIRONMENT DIVISION.                                            00030002
+       INPUT-OUTPUT SECTION.                                            00040002
+       FILE-CONTROL.                                                    00050002
+           SELECT INPUT-PS3 ASSIGN TO DD1                               00060002
+           ORGANIZATION IS SEQUENTIAL                                   00070002
+           ACCESS IS SEQUENTIAL                                         00080002
+           FILE STATUS IS WS-FST-INPUT-PS3.                             00090002
+           SELECT OUTPUT-KSDS ASSIGN TO DD2                             00100003
+           ORGANIZATION IS INDEXED                                      00110002
+           ACCESS IS RANDOM                                             00120002
+           RECORD KEY IS STUDENT-ID-NEW                                 00130002
+           FILE STATUS IS WS-FST-OUTPUT-KSDS.                           00140002
+       DATA DIVISION.                                                   00150002
+       FILE SECTION.                                                    00160002
+       FD INPUT-PS3.                                                    00170002
+       01 INPUT-PS3-REC.                                                00180002
+           05 STUDENT-ID           PIC 9(05).                           00190002
+           05 F                    PIC X(01).                           00200002
+           05 FIRST-NAME           PIC X(10).                           00210002
+           05 F                    PIC X(01).                           00220002
+           05 LAST-NAME            PIC X(10).                           00230002
+           05 F                    PIC X(01).                           00240002
+           05 MARKS                PIC 9(2).9(2).                       00250014
+           05 F                    PIC X(47).                           00260017
+       FD OUTPUT-KSDS.                                                  00270002
+       01 OUTPUT-KSDS-REC.                                              00280002
+           05 STUDENT-ID-NEW       PIC 9(6).                            00290002
+           05 F                    PIC X(01).                           00300002
+           05 NEW-NAME             PIC X(15).                           00310002
+           05 F                    PIC X(01).                           00320002
+           05 MARKS-NEW            PIC 9(2).9(2).                       00330034
+           05 F                    PIC X(01).                           00340002
+           05 PERCENTAGE-NEW       PIC 9(2).                            00350021
+           05 F                    PIC X(01).                           00360002
+           05 RESULT-NEW           PIC X(30).                           00370002
+           05 F                    PIC X(18).                           00380020
+       WORKING-STORAGE SECTION.                                         00390002
+       01 WS-VARS.                                                      00400002
+           05 WS-FST-INPUT-PS3     PIC 9(02).                           00410002
+               88 C05-INPUT-SUC    VALUE 00.                            00420002
+               88 C05-INPUT-EOF    VALUE 10.                            00430002
+           05 WS-FST-OUTPUT-KSDS   PIC 9(02).                           00440002
+               88 C05-OUTPUT-SUC   VALUE 00.                            00450002
+               88 C05-OUTPUT-EOF   VALUE 10.                            00460002
+           05 NUM-MARKS            PIC 9(2)V9(2).                       00461016
+           05 DIVIS                PIC 9(2)V9(2).                       00462026
+       PROCEDURE DIVISION.                                              00470002
+       0000-MAIN-PARA.                                                  00480002
+           PERFORM 2000-PROCESS-PARA                                    00490002
+           THRU 2000-PROCESS-PARA-EXIT                                  00500002
+           .                                                            00510002
+       0000-MAIN-PARA-EXIT.                                             00520002
+           EXIT.                                                        00530002
+       2000-PROCESS-PARA.                                               00540002
+           PERFORM 2100-OPEN-PARA                                       00550002
+           THRU 2100-OPEN-PARA-EXIT                                     00560002
+           PERFORM 2200-READ-PARA                                       00570002
+           THRU 2200-READ-PARA-EXIT UNTIL C05-INPUT-EOF                 00580002
+           PERFORM 8000-CLOSE-PARA                                      00590002
+           THRU 8000-CLOSE-PARA-EXIT                                    00600002
+           PERFORM 9000-TERMINATION-PARA                                00610002
+           THRU 9000-TERMINATION-PARA-EXIT                              00620002
+           .                                                            00630002
+       2000-PROCESS-PARA-EXIT.                                          00640002
+           EXIT.                                                        00650002
+       2100-OPEN-PARA.                                                  00660002
+           OPEN INPUT INPUT-PS3                                         00670002
+           EVALUATE TRUE                                                00680002
+           WHEN C05-INPUT-SUC                                           00690002
+           DISPLAY 'INPUT FILE OPENED'                                  00700002
+           WHEN OTHER                                                   00710002
+           DISPLAY 'INPUT FILE OPEN FAILED' WS-FST-INPUT-PS3            00720002
+           PERFORM 9000-TERMINATION-PARA                                00730002
+           THRU 9000-TERMINATION-PARA-EXIT                              00740002
+           END-EVALUATE                                                 00750002
+           OPEN OUTPUT OUTPUT-KSDS                                      00760035
+           EVALUATE TRUE                                                00770002
+           WHEN  C05-OUTPUT-SUC                                         00780002
+           DISPLAY 'OUTPUT FILE OPENED'                                 00790002
+           WHEN OTHER                                                   00800002
+           DISPLAY 'OUTPUT FILE OPEN FAILED' WS-FST-OUTPUT-KSDS         00810002
+           PERFORM 9000-TERMINATION-PARA                                00820002
+           THRU 9000-TERMINATION-PARA-EXIT                              00830002
+           END-EVALUATE                                                 00840002
+           .                                                            00850002
+       2100-OPEN-PARA-EXIT.                                             00860002
+           EXIT.                                                        00870002
+       2200-READ-PARA.                                                  00880002
+           MOVE SPACES TO INPUT-PS3-REC OUTPUT-KSDS-REC                 00890002
+           READ INPUT-PS3                                               00900002
+           EVALUATE TRUE                                                00910002
+           WHEN C05-INPUT-SUC                                           00920002
+               DISPLAY 'READ SUCCESS'                                   00930002
+               PERFORM 2210-VALID-PARA                                  00940002
+               THRU 2210-VALID-PARA-EXIT                                00950002
+           WHEN C05-INPUT-EOF                                           00960002
+               DISPLAY 'ALL INPUT FILES READ'                           00970002
+           WHEN OTHER                                                   00980002
+               DISPLAY 'READ FAILED' WS-FST-INPUT-PS3                   00990002
+               PERFORM 9000-TERMINATION-PARA                            01000002
+               THRU 9000-TERMINATION-PARA-EXIT                          01010002
+           END-EVALUATE                                                 01020002
+           .                                                            01030002
+       2200-READ-PARA-EXIT.                                             01040002
+           EXIT.                                                        01050002
+       2210-VALID-PARA.                                                 01060002
+           EVALUATE TRUE                                                01070002
+           WHEN STUDENT-ID IS NUMERIC AND                               01080002
+                FIRST-NAME > SPACES AND                                 01090002
+                LAST-NAME IS ALPHABETIC AND                             01100002
+                MARKS(1:2) IS NUMERIC AND                               01110009
+                MARKS(3:1) = '.' AND                                    01120015
+                MARKS(4:2) IS NUMERIC                                   01121014
+                PERFORM 2220-DAPR-PARA                                  01130002
+                THRU 2220-DAPR-PARA-EXIT                                01140002
+           WHEN OTHER                                                   01150002
+               DISPLAY 'INVALID RECORD FOUND'                           01151005
+               CONTINUE                                                 01160002
+           END-EVALUATE                                                 01170002
+           .                                                            01180002
+       2210-VALID-PARA-EXIT.                                            01190002
+           EXIT.                                                        01200002
+       2220-DAPR-PARA.                                                  01210002
+           MOVE 'S' TO STUDENT-ID-NEW(1:1)                              01220002
+           MOVE STUDENT-ID TO STUDENT-ID-NEW(2:5)                       01230002
+           INSPECT FIRST-NAME REPLACING ALL '@' BY ' ' '$' BY ' '       01240002
+           '%' BY ' ' '&' BY ' '                                        01250002
+           MOVE LAST-NAME(1:1) TO NEW-NAME(1:1)                         01260002
+           MOVE '.' TO NEW-NAME(2:1)                                    01270002
+           MOVE FIRST-NAME TO NEW-NAME(3:10)                            01280002
+           MOVE MARKS TO MARKS-NEW                                      01281033
+           PERFORM 2230-PERCENT-PARA                                    01290002
+           THRU 2230-PERCENT-PARA-EXIT                                  01300002
+           PERFORM 3000-WRITE-PARA                                      01310002
+           THRU 3000-WRITE-PARA-EXIT                                    01320002
+           .                                                            01330002
+       2220-DAPR-PARA-EXIT.                                             01340002
+           EXIT.                                                        01350002
+       2230-PERCENT-PARA.                                               01360002
+           MOVE MARKS TO NUM-MARKS                                      01361022
+           CALL 'CA21G132' USING NUM-MARKS PERCENTAGE-NEW               01370036
+           DISPLAY 'PERCENTAGE-NEW = ' PERCENTAGE-NEW                   01380002
+           EVALUATE TRUE                                                01381031
+           WHEN PERCENTAGE-NEW >= 70                                    01382031
+           MOVE 'CONGRATULATIONS!!!' TO RESULT-NEW                      01383032
+           WHEN OTHER                                                   01384031
+           MOVE 'BETTER LUCK NEXT TIME!!!' TO RESULT-NEW                01385032
+           END-EVALUATE                                                 01386031
+           .                                                            01390002
+       2230-PERCENT-PARA-EXIT.                                          01400002
+           EXIT.                                                        01410002
+       3000-WRITE-PARA.                                                 01420002
+           WRITE OUTPUT-KSDS-REC.                                       01430002
+       3000-WRITE-PARA-EXIT.                                            01440002
+           EXIT.                                                        01450002
+       8000-CLOSE-PARA.                                                 01460002
+           CLOSE INPUT-PS3                                              01470002
+           CLOSE OUTPUT-KSDS                                            01480002
+           .                                                            01490002
+       8000-CLOSE-PARA-EXIT.                                            01500002
+           EXIT.                                                        01510002
+       9000-TERMINATION-PARA.                                           01520002
+           STOP RUN.                                                    01530002
+       9000-TERMINATION-PARA-EXIT.                                      01540002
+           EXIT.                                                        01550002
+

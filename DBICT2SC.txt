@@ -1,0 +1,16 @@
+CREATE TABLE MEM_DET (MEMBER_ID CHAR(6) NOT NULL PRIMARY KEY,
+                      MEMBER_NAME VARCHAR(15),
+                      PHONE_NO CHAR(6) NOT NULL,
+                      CITY VARCHAR(15),
+                      DATE_REGISTER DATE,
+                      DATE_EXPIRE DATE)
+                      IN DBLAB01.TSLAB2;
+CREATE UNIQUE INDEX MEM_IND ON MEM_DET(MEMBER_ID);
+CREATE TABLE BOOK_DET (BOOK_ID CHAR(5) NOT NULL PRIMARY KEY,
+                       MEMBER_ID CHAR(6) NOT NULL,
+                       DATE_ISSUE DATE NOT NULL,
+                       DATE_TO_BE_RETURN DATE NOT NULL,
+                       DATE_RETURNED DATE NOT NULL)
+                       IN DBLAB01.TSLAB2;
+CREATE UNIQUE INDEX BOOK_IND ON BOOK_DET(BOOK_ID);
+

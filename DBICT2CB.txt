@@ -1,0 +1,373 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. DBICT2CB.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+                SELECT OUTFILE ASSIGN TO OUTMEM
+                ORGANIZATION IS SEQUENTIAL
+                ACCESS MODE  IS SEQUENTIAL
+                FILE STATUS  IS WS-FS1.
+       DATA DIVISION.
+       FILE SECTION.
+       FD OUTFILE.
+       01 OUTREC.
+           02 O-BOOK-ID                 PIC X(5).
+           02 FILLER                    PIC X(1).
+           02 O-MEMBER-ID               PIC X(6).
+           02 FILLER                    PIC X(1).
+           02 O-MEMBER-NAME             PIC X(15).
+           02 FILLER                    PIC X(1).
+           02 O-PHONE-NO                PIC X(6).
+           02 FILLER                    PIC X(1).
+           02 O-CITY                    PIC X(15).
+           02 FILLER                    PIC X(1).
+           02 O-DATE-ISSUE              PIC X(10).
+           02 FILLER                    PIC X(1).
+           02 O-DATE-TO-BE-RETURN       PIC X(10).
+           02 FILLER                    PIC X(1).
+           02 O-DATE-RETURNED           PIC X(10).
+           02 FILLER                    PIC X(1).
+           02 O-FINE-AMT                PIC 9(3).
+           02 FILLER                    PIC X(12).
+       WORKING-STORAGE SECTION.
+       01 WSS-ERR-MSG.
+           03 WS-ERR-MSG.
+              05 WS-ERR-MSG-LEN       PIC S9(4) COMP VALUE 800.
+              05 WS-ERR-MSG-TEXT      PIC X(80) OCCURS 10 TIMES.
+           03 WS-ERR-MSG-LRECL        PIC S9(9) COMP VALUE 80.
+       77 WS-SQLCODE1                 PIC S9(3) SIGN LEADING SEPARATE.
+       77 WS-SQLCODE2                 PIC S9(3) SIGN LEADING SEPARATE.
+       77 WS-NULL-IND1                PIC S9(4) COMP.
+       77 WS-NULL-IND2                PIC S9(4) COMP.
+       77 WS-NULL-IND3                PIC S9(4) COMP.
+       77 WS-FS1                      PIC 9(2).
+       77 WS-YEAR-REGISTER            PIC 9(4).
+       77 WS-DATE-RETURNED            PIC 9(8).
+       77 WS-DATE-TO-BE-RETURN        PIC 9(8).
+       77 DATE-RETURNED-INT           PIC 9(7).
+       77 DATE-TO-BE-RETURN-INT       PIC 9(7).
+       77 DATE-RETURNED-JULIAN        PIC 9(7).
+       77 DATE-TO-BE-RETURN-JULIAN    PIC 9(7).
+       77 WS-LENDING-YR               PIC 9(4).
+       77 WS-LENDING-DAY              PIC 9(3).
+       77 WS-LENDING-PERIOD           PIC 9(4).
+       77 WS-DTRYEAR                  PIC 9(4).
+       77 WS-RYEAR                    PIC 9(4).
+       77 WS-DTRDAY                   PIC 9(3).
+       77 WS-RDAY                     PIC 9(3).
+           EXEC SQL
+             INCLUDE SQLCA
+           END-EXEC.
+           EXEC SQL
+             INCLUDE MEMDCL
+           END-EXEC.
+           EXEC SQL
+             INCLUDE BOOKDCL
+           END-EXEC.
+           EXEC SQL
+             DECLARE CURSOR01 CURSOR FOR
+             SELECT MEMBER_ID,MEMBER_NAME,PHONE_NO,CITY,DATE_REGISTER,
+                    DATE_EXPIRE
+             FROM MEM_DET
+             ORDER BY MEMBER_ID
+           END-EXEC.
+           EXEC SQL
+             DECLARE CURSOR02 CURSOR FOR
+             SELECT B.BOOK_ID,M.MEMBER_ID,M.MEMBER_NAME,M.PHONE_NO,
+                    M.CITY,B.DATE_ISSUE,M.DATE_REGISTER,
+                    B.DATE_TO_BE_RETURN,B.DATE_RETURNED
+             FROM MEM_DET M JOIN BOOK_DET B
+             ON M.MEMBER_ID = B.MEMBER_ID
+             ORDER BY M.MEMBER_ID
+           END-EXEC.
+       PROCEDURE DIVISION.
+       0000-MAIN-PARA.
+           PERFORM 1000-INITIALIZE-PARA THRU
+                   1000-INITIALIZE-PARA-EXIT.
+           PERFORM 2000-PROCESS-PARA THRU
+                   2000-PROCESS-PARA-EXIT.
+           PERFORM 9000-TERMINATION-PARA THRU
+                   9000-TERMINATION-PARA-EXIT.
+       0000-MAIN-PARA-EXIT.
+           EXIT.
+       1000-INITIALIZE-PARA.
+           INITIALIZE WS-SQLCODE1 WS-SQLCODE2 WS-FS1.
+       1000-INITIALIZE-PARA-EXIT.
+           EXIT.
+       2000-PROCESS-PARA.
+           PERFORM 2100-FILE-OPEN-PARA THRU
+                   2100-FILE-OPEN-PARA-EXIT.
+           PERFORM 2200-CUR1-OPEN-PARA THRU
+                   2200-CUR1-OPEN-PARA-EXIT.
+           PERFORM 2250-FETCH1-PARA THRU
+                   2250-FETCH1-PARA-EXIT UNTIL WS-SQLCODE1 = +100.
+           PERFORM 2450-CUR1-CLOSE-PARA THRU
+                   2450-CUR1-CLOSE-PARA-EXIT.
+           PERFORM 2500-CUR2-OPEN-PARA THRU
+                   2500-CUR2-OPEN-PARA-EXIT.
+           PERFORM 2550-FETCH2-PARA THRU
+                   2550-FETCH2-PARA-EXIT UNTIL WS-SQLCODE2 = +100.
+           PERFORM 2900-CUR2-CLOSE-PARA THRU
+                   2900-CUR2-CLOSE-PARA-EXIT.
+           PERFORM 3100-FILE-CLOSE-PARA THRU
+                   3100-FILE-CLOSE-PARA-EXIT.
+       2000-PROCESS-PARA-EXIT.
+           EXIT.
+       2100-FILE-OPEN-PARA.
+           OPEN OUTPUT OUTFILE.
+           EVALUATE TRUE
+           WHEN WS-FS1 = 0
+                CONTINUE
+           WHEN OTHER
+                DISPLAY "FILE OPEN FAILED " WS-FS1
+                STOP RUN
+           END-EVALUATE.
+       2100-FILE-OPEN-PARA-EXIT.
+           EXIT.
+       2200-CUR1-OPEN-PARA.
+           EXEC SQL
+             OPEN CURSOR01
+           END-EXEC.
+           MOVE SQLCODE TO WS-SQLCODE1.
+           EVALUATE TRUE
+           WHEN WS-SQLCODE1 = 0
+                CONTINUE
+           WHEN OTHER
+                DISPLAY "CURSOR01 NOT OPENED " WS-SQLCODE1
+                CALL 'DSNTIAR' USING SQLCA WS-ERR-MSG WS-ERR-MSG-LRECL
+                DISPLAY WS-ERR-MSG
+                STOP RUN
+           END-EVALUATE.
+       2200-CUR1-OPEN-PARA-EXIT.
+           EXIT.
+       2250-FETCH1-PARA.
+           INITIALIZE DCLMEM-DET.
+           EXEC SQL
+             FETCH CURSOR01
+             INTO :HV1-MEMBER-ID,
+                  :HV1-MEMBER-NAME,
+                  :HV1-PHONE-NO,
+                  :HV1-CITY,
+                  :HV1-DATE-REGISTER :WS-NULL-IND1,
+                  :HV1-DATE-EXPIRE :WS-NULL-IND2
+           END-EXEC.
+           MOVE SQLCODE TO WS-SQLCODE1.
+           EVALUATE TRUE
+           WHEN WS-SQLCODE1 = 0
+                DISPLAY "CURSOR01 FETCHED"
+                PERFORM 2300-NULL-HANDLE1-PARA THRU
+                        2300-NULL-HANDLE1-PARA-EXIT
+           WHEN WS-SQLCODE1 = +100
+                CONTINUE
+           WHEN OTHER
+                DISPLAY "CURSOR01 FETCHED FAILED " WS-SQLCODE1
+                CALL 'DSNTIAR' USING SQLCA WS-ERR-MSG WS-ERR-MSG-LRECL
+                DISPLAY WS-ERR-MSG
+                STOP RUN
+           END-EVALUATE.
+       2250-FETCH1-PARA-EXIT.
+           EXIT.
+       2300-NULL-HANDLE1-PARA.
+           EVALUATE TRUE
+           WHEN WS-NULL-IND1 = 0
+                PERFORM 2400-UPDATE-PARA THRU
+                        2400-UPDATE-PARA-EXIT
+           WHEN OTHER
+                CONTINUE
+           END-EVALUATE.
+       2300-NULL-HANDLE1-PARA-EXIT.
+           EXIT.
+       2400-UPDATE-PARA.
+           MOVE HV1-DATE-REGISTER(1:4) TO WS-YEAR-REGISTER.
+           COMPUTE WS-YEAR-REGISTER = WS-YEAR-REGISTER + 2.
+           MOVE WS-YEAR-REGISTER TO HV1-DATE-EXPIRE(1:4).
+           MOVE HV1-DATE-REGISTER(5:6) TO HV1-DATE-EXPIRE(5:6).
+           EXEC SQL
+             UPDATE MEM_DET SET DATE_EXPIRE = :HV1-DATE-EXPIRE
+             WHERE MEMBER_ID = :HV1-MEMBER-ID
+           END-EXEC.
+           MOVE SQLCODE TO WS-SQLCODE1.
+           EVALUATE TRUE
+           WHEN WS-SQLCODE1 = 0
+                DISPLAY "UPDATE SUCCESS"
+           WHEN WS-SQLCODE1 = +100
+                CONTINUE
+           WHEN OTHER
+                DISPLAY "UPDATE FAILED " WS-SQLCODE1
+                CALL 'DSNTIAR' USING SQLCA WS-ERR-MSG WS-ERR-MSG-LRECL
+                DISPLAY WS-ERR-MSG
+                STOP RUN
+           END-EVALUATE.
+       2400-UPDATE-PARA-EXIT.
+           EXIT.
+       2450-CUR1-CLOSE-PARA.
+           EXEC SQL
+             CLOSE CURSOR01
+           END-EXEC.
+           MOVE SQLCODE TO WS-SQLCODE1.
+           EVALUATE TRUE
+           WHEN WS-SQLCODE1 = 0
+                DISPLAY "CURSOR01 CLOSED"
+           WHEN OTHER
+                DISPLAY "CURSOR01 NOT CLOSED " WS-SQLCODE1
+                CALL 'DSNTIAR' USING SQLCA WS-ERR-MSG WS-ERR-MSG-LRECL
+                DISPLAY WS-ERR-MSG
+                STOP RUN
+           END-EVALUATE.
+       2450-CUR1-CLOSE-PARA-EXIT.
+           EXIT.
+       2500-CUR2-OPEN-PARA.
+           EXEC SQL
+             OPEN CURSOR02
+           END-EXEC.
+           MOVE SQLCODE TO WS-SQLCODE2.
+           EVALUATE TRUE
+           WHEN WS-SQLCODE2 = 0
+                CONTINUE
+           WHEN OTHER
+                DISPLAY "CURSOR02 NOT OPENED " WS-SQLCODE2
+                CALL 'DSNTIAR' USING SQLCA WS-ERR-MSG WS-ERR-MSG-LRECL
+                DISPLAY WS-ERR-MSG
+                STOP RUN
+           END-EVALUATE.
+       2500-CUR2-OPEN-PARA-EXIT.
+           EXIT.
+       2550-FETCH2-PARA.
+           INITIALIZE DCLMEM-DET DCLBOOK-DET.
+           EXEC SQL
+             FETCH CURSOR02
+             INTO :HV2-BOOK-ID,
+                  :HV1-MEMBER-ID,
+                  :HV1-MEMBER-NAME,
+                  :HV1-PHONE-NO,
+                  :HV1-CITY,
+                  :HV2-DATE-ISSUE,
+                  :HV1-DATE-REGISTER :WS-NULL-IND3,
+                  :HV2-DATE-TO-BE-RETURN,
+                  :HV2-DATE-RETURNED
+           END-EXEC.
+           MOVE SQLCODE TO WS-SQLCODE2.
+           EVALUATE TRUE
+           WHEN WS-SQLCODE2 = 0
+                DISPLAY "CURSOR02 FETCHED"
+                PERFORM 2600-NULL-HANDLE2-PARA THRU
+                        2600-NULL-HANDLE2-PARA-EXIT
+           WHEN WS-SQLCODE2 = +100
+                CONTINUE
+           WHEN OTHER
+                DISPLAY "CURSOR02 FETCHED FAILED " WS-SQLCODE2
+                CALL 'DSNTIAR' USING SQLCA WS-ERR-MSG WS-ERR-MSG-LRECL
+                DISPLAY WS-ERR-MSG
+                STOP RUN
+           END-EVALUATE.
+       2550-FETCH2-PARA-EXIT.
+           EXIT.
+       2600-NULL-HANDLE2-PARA.
+           EVALUATE TRUE
+           WHEN WS-NULL-IND3 = 0
+                PERFORM 2650-LEND-PARA THRU
+                        2650-LEND-PARA-EXIT
+           WHEN OTHER
+                CONTINUE
+           END-EVALUATE.
+       2600-NULL-HANDLE2-PARA-EXIT.
+           EXIT.
+       2650-LEND-PARA.
+           MOVE HV2-DATE-RETURNED(1:4) TO WS-DATE-RETURNED(1:4).
+           MOVE HV2-DATE-RETURNED(6:2) TO WS-DATE-RETURNED(5:2).
+           MOVE HV2-DATE-RETURNED(9:2) TO WS-DATE-RETURNED(7:2).
+           MOVE HV2-DATE-TO-BE-RETURN(1:4) TO
+                WS-DATE-TO-BE-RETURN(1:4).
+           MOVE HV2-DATE-TO-BE-RETURN(6:2) TO
+                WS-DATE-TO-BE-RETURN(5:2).
+           MOVE HV2-DATE-TO-BE-RETURN(9:2) TO
+                WS-DATE-TO-BE-RETURN(7:2).
+           COMPUTE DATE-RETURNED-INT =
+                   FUNCTION INTEGER-OF-DATE(WS-DATE-RETURNED).
+           COMPUTE DATE-RETURNED-JULIAN =
+                   FUNCTION DAY-OF-INTEGER(DATE-RETURNED-INT).
+           COMPUTE DATE-TO-BE-RETURN-INT =
+                   FUNCTION INTEGER-OF-DATE(WS-DATE-TO-BE-RETURN).
+           COMPUTE DATE-TO-BE-RETURN-JULIAN =
+                   FUNCTION DAY-OF-INTEGER(DATE-TO-BE-RETURN-INT).
+           MOVE DATE-RETURNED-JULIAN(1:4) TO WS-RYEAR.
+           MOVE DATE-RETURNED-JULIAN(5:3) TO WS-RDAY.
+           MOVE DATE-TO-BE-RETURN-JULIAN(1:4) TO WS-DTRYEAR.
+           MOVE DATE-TO-BE-RETURN-JULIAN(5:3) TO WS-DTRDAY.
+           COMPUTE WS-LENDING-YR =  WS-RYEAR - WS-DTRYEAR.
+           COMPUTE WS-LENDING-DAY =  WS-RDAY - WS-DTRDAY.
+           COMPUTE WS-LENDING-PERIOD = ( 365 * WS-LENDING-YR )
+                   + WS-LENDING-DAY.
+           PERFORM 2700-FINE-AMT-PARA THRU
+                   2700-FINE-AMT-PARA-EXIT.
+       2650-LEND-PARA-EXIT.
+           EXIT.
+       2700-FINE-AMT-PARA.
+           MOVE SPACES TO OUTREC.
+           EVALUATE TRUE
+           WHEN WS-LENDING-PERIOD <= 0
+                MOVE 0 TO O-FINE-AMT
+           WHEN WS-LENDING-PERIOD > 0 AND WS-LENDING-PERIOD <= 10
+                MOVE 50 TO O-FINE-AMT
+           WHEN WS-LENDING-PERIOD >= 11 AND WS-LENDING-PERIOD <= 30
+                MOVE 100 TO O-FINE-AMT
+           WHEN WS-LENDING-PERIOD >= 31 AND WS-LENDING-PERIOD <= 60
+                MOVE 200 TO O-FINE-AMT
+           WHEN WS-LENDING-PERIOD >= 61 AND WS-LENDING-PERIOD <= 1000
+                MOVE 500 TO O-FINE-AMT
+           END-EVALUATE.
+           PERFORM 2800-WRITE-PARA THRU
+                   2800-WRITE-PARA-EXIT.
+       2700-FINE-AMT-PARA-EXIT.
+           EXIT.
+       2800-WRITE-PARA.
+           MOVE HV2-BOOK-ID TO O-BOOK-ID.
+           MOVE HV1-MEMBER-ID TO O-MEMBER-ID.
+           MOVE HV1-MEMBER-NAME-TEXT TO O-MEMBER-NAME.
+           MOVE HV1-PHONE-NO TO O-PHONE-NO.
+           MOVE HV1-CITY-TEXT TO O-CITY.
+           MOVE HV2-DATE-ISSUE TO O-DATE-ISSUE.
+           MOVE HV2-DATE-TO-BE-RETURN TO O-DATE-TO-BE-RETURN.
+           MOVE HV2-DATE-RETURNED TO O-DATE-RETURNED.
+           WRITE OUTREC.
+           EVALUATE TRUE
+           WHEN WS-FS1 = 0
+                DISPLAY "WRITE SUCCESS"
+           WHEN OTHER
+                DISPLAY "WRITE FAILED " WS-FS1
+                STOP RUN
+           END-EVALUATE.
+       2800-WRITE-PARA-EXIT.
+           EXIT.
+       2900-CUR2-CLOSE-PARA.
+           EXEC SQL
+             CLOSE CURSOR02
+           END-EXEC.
+           MOVE SQLCODE TO WS-SQLCODE2.
+           EVALUATE TRUE
+           WHEN WS-SQLCODE2 = 0
+                DISPLAY "CURSOR02 CLOSED"
+           WHEN OTHER
+                DISPLAY "CURSOR02 NOT CLOSED " WS-SQLCODE2
+                CALL 'DSNTIAR' USING SQLCA WS-ERR-MSG WS-ERR-MSG-LRECL
+                DISPLAY WS-ERR-MSG
+                STOP RUN
+           END-EVALUATE.
+       2900-CUR2-CLOSE-PARA-EXIT.
+           EXIT.
+       3100-FILE-CLOSE-PARA.
+           CLOSE OUTFILE.
+           EVALUATE TRUE
+           WHEN WS-FS1 = 0
+                DISPLAY "FILE CLOSED"
+           WHEN OTHER
+                DISPLAY "FILE CLOSE FAILED " WS-FS1
+                STOP RUN
+           END-EVALUATE.
+       3100-FILE-CLOSE-PARA-EXIT.
+           EXIT.
+       9000-TERMINATION-PARA.
+           STOP RUN.
+       9000-TERMINATION-PARA-EXIT.
+           EXIT.
+

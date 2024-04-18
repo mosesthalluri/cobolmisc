@@ -1,0 +1,9 @@
+//TECN132C JOB NOTIFY=&SYSUID                                           00010002
+//JOBPROC JCLLIB ORDER=IBMUSER.ALL1                                     00040000
+//COBCL EXEC IGYWCL,                                                    00050000
+//          PGMLIB=TECN132.COBOL.LOADLIB,        --> LOADLIB NAME       00060003
+//          COPYLIB=TECN132.L1.M24MF001.PDS,     --> COPYLIB NAME       00061003
+//          GOPGM=CA11G132                      --> MEMBER NAME         00070007
+//COBOL.SYSIN DD DSN=TECN132.L1.M24MF001.PDS(CA11G132),DISP=SHR -->SRC  00080007
+//LKED.SYSLIB DD DSN=TECN132.COBOL.LOADLIB(CA21G139),DISP=SHR           00090007
+

@@ -1,0 +1,98 @@
+       IDENTIFICATION DIVISION.                                         00010000
+       PROGRAM-ID. ICT03CBM.                                            00020000
+       ENVIRONMENT DIVISION.                                            00030000
+       INPUT-OUTPUT SECTION.                                            00040000
+       FILE-CONTROL.                                                    00050000
+                   SELECT TI001-KSDS ASSIGN TO INPKSDS                  00060000
+                          ORGANIZATION IS INDEXED                       00070000
+                          RECORD KEY IS TI001-BOOK-NO                   00080000
+                          ACCESS IS SEQUENTIAL                          00090000
+                          FILE STATUS IS WS-FST-TI001.                  00100000
+                   SELECT TO001-KSDS ASSIGN TO OUTKSDS                  00110000
+                          ORGANIZATION IS INDEXED                       00120000
+                          RECORD KEY IS TO001-BOOK-NO                   00130000
+                          ACCESS IS SEQUENTIAL                          00140000
+                          FILE STATUS IS WS-FST-TO001.                  00150000
+       DATA DIVISION.                                                   00160000
+       FILE SECTION.                                                    00170000
+       FD TI001-KSDS.                                                   00180000
+       01 TI001-KSDS-REC.                                               00190000
+           05 TI001-BOOK-NO           PIC X(09).                        00200000
+           05 FILLER                  PIC X(01).                        00210000
+           05 TI001-BOOK-NAME         PIC X(25).                        00220000
+           05 FILLER                  PIC X(01).                        00230000
+           05 TI001-BOOK-PRICE        PIC 9(04).9(03).                  00240000
+           05 FILLER                  PIC X(01).                        00250000
+           05 TI001-SYMBOL            PIC X(07).                        00260000
+           05 FILLER                  PIC X(28).                        00270000
+       FD TO001-KSDS.                                                   00280000
+       01 TO001-KSDS-REC.                                               00290000
+           05 TO001-BOOK-NO           PIC X(09).                        00300000
+           05 FILLER                  PIC X(01).                        00310000
+           05 TO001-BOOK-NAME         PIC X(25).                        00320000
+           05 FILLER                  PIC X(01).                        00330000
+           05 TO001-BOOK-PRICE        PIC 9(04).9(03).                  00340000
+           05 FILLER                  PIC X(01).                        00350000
+           05 TO001-SYMBOL            PIC X(07).                        00360000
+           05 FILLER                  PIC X(28).                        00370000
+       WORKING-STORAGE SECTION.                                         00380000
+       01 WS-VARS.                                                      00390000
+           05 WS-FST-TI001  PIC 9(02).                                  00400000
+           05 WS-FST-TO001  PIC 9(02).                                  00410000
+           05 WS-COUNTER    PIC 9(2).                                   00420000
+           05 WS-BOOK-PRICE PIC 9(04)V9(03).                            00430000
+           05 WS-NEW-PRICE  PIC 9(04)V9(02).                            00440000
+       01 WS-TABLE.                                                     00450000
+           05 WS-BOOK-TABLE OCCURS 7 TIMES.                             00460000
+               10 WS-TABLE-BOOK-NO        PIC 9(09).                    00470000
+               10 WS-TABLE-BOOK-NAME      PIC X(25).                    00480000
+               10 WS-TABLE-BOOK-PRICE     PIC 9(4).9(2).                00490000
+               10 WS-TABLE-SYMBOL         PIC X(7).                     00500000
+       PROCEDURE DIVISION.                                              00510000
+       0000-MAIN-PARA.                                                  00520000
+           PERFORM 1000-INIT-PARA                                       00530000
+              THRU 1000-INIT-PARA-EXIT                                  00540000
+           PERFORM 2000-PROC-PARA                                       00550000
+              THRU 2000-PROC-PARA-EXIT                                  00560000
+           PERFORM 9000-TERM-PARA                                       00570000
+              THRU 9000-TERM-PARA-EXIT                                  00580000
+           .                                                            00590000
+       1000-INIT-PARA.                                                  00600000
+           CONTINUE                                                     00610000
+           .                                                            00620000
+       1000-INIT-PARA-EXIT.                                             00630000
+           EXIT                                                         00640000
+           .                                                            00650000
+       2000-PROC-PARA.                                                  00660000
+           PERFORM 2100-OPEN-PARA                                       00670000
+              THRU 2100-OPEN-PARA-EXIT                                  00680000
+           PERFORM 2200-READ-PARA                                       00690000
+              THRU 2200-READ-PARA-EXIT                                  00700000
+             UNTIL WS-FST-TI001 = 10                                    00710000
+           PERFORM 2300-CLOSE-PARA                                      00720000
+              THRU 2300-CLOSE-PARA-EXIT                                 00730000
+           .                                                            00740000
+       2000-PROC-PARA-EXIT.                                             00750000
+           EXIT                                                         00760000
+           .                                                            00770000
+       9000-TERM-PARA.                                                  00780000
+           CONTINUE                                                     00790000
+           .                                                            00800000
+       9000-TERM-PARA-EXIT.                                             00810000
+           STOP RUN                                                     00820000
+           .                                                            00830000
+       2100-OPEN-PARA.                                                  00840000
+           OPEN I-O TI001-KSDS                                          00850000
+           EVALUATE TRUE                                                00860000
+              WHEN WS-FST-TI001 = 00                                    00870000
+                  DISPLAY 'TI001-KSDS HAS OPENED'                       00880000
+              WHEN OTHER                                                00890000
+                  DISPLAY 'OPENING OF TI001-KSDS HAS FAILED'            00900000
+                  DISPLAY 'THE FILE STATUS CODE IS: ' WS-FST-TI001      00910000
+                  PERFORM 9000-TERM-PARA                                00920000
+                     THRU 9000-TERM-PARA-EXIT                           00930000
+           END-EVALUATE                                                 00940000
+           OPEN OUTPUT TO001-KSDS                                       00950000
+           EVALUATE TRUE                                                00960000
+              WHEN WS-FST-TO001 = 00                                    00970000
+                  D

@@ -1,0 +1,180 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CC01CB01.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT TI001-PS1 ASSIGN TO INPRDS
+                    ORGANIZATION    IS SEQUENTIAL
+                    ACCESS MODE     IS SEQUENTIAL
+                    FILE STATUS     IS WS-FST-TI001
+           .
+           SELECT TO001-PS2 ASSIGN TO OUTPRDS
+                    ORGANIZATION      IS SEQUENTIAL
+                    ACCESS MODE       IS SEQUENTIAL
+                    FILE STATUS       IS WS-FST-TO001
+           .
+       DATA DIVISION.
+       FILE SECTION.
+       FD TI001-PS1.
+       01 TI001-PS1-REC.
+           05 TI001-PROD-CODE      PIC X(5).
+           05 FILLER               PIC X(1).
+           05 TI001-QUANTITY       PIC 9(3).
+           05 FILLER               PIC X(1).
+           05 TI001-ORDER-STATUS   PIC X(10).
+           05 FILLER               PIC X(1).
+           05 TI001-EXPIRY-STATUS  PIC X(10).
+           05 FILLER               PIC X(1).
+           05 TI001-EXPIRY-DATE    PIC X(10).
+           05 FILLER               PIC X(38).
+       FD TO001-PS2.
+       01 TO001-PS2-REC.
+           05 TO001-PRODUCT-CODE   PIC X(5).
+           05 FILLER               PIC X(1).
+           05 TO001-QUANTITY       PIC 9(3).
+           05 FILLER               PIC X(1).
+           05 TO001-ORDER-STATUS   PIC X(10).
+           05 FILLER               PIC X(1).
+           05 TO001-EXPIRY-STATUS  PIC X(10).
+           05 FILLER               PIC X(1).
+           05 TO001-EXPIRY-DATE    PIC X(10).
+           05 FILLER               PIC X(1).
+           05 TO001-PRIORITY       PIC X(5).
+           05 FILLER               PIC X(32).
+       WORKING-STORAGE SECTION.
+       01 WS-VARS.
+            05 WS-FST-TI001     PIC 9(02).
+               88 TI001-SUCCESS VALUE 00.
+               88 TI001-EOF     VALUE 10.
+            05 WS-FST-TO001     PIC 9(02).
+               88 TO001-SUCCESS VALUE 00.
+               88 TO001-EOF     VALUE 10.
+       01 WS-COUNTER            PIC 9(02) VALUE ZEROS.
+       01 WS-EXPIRY-DATE.
+              05 WS-YEAR           PIC 9(4).
+              05 WS-MONTH          PIC 9(2).
+              05 WS-DAY            PIC 9(2).
+       01 WS-CURRENT-DATE.
+              05 WS-CURR-YEAR           PIC 9(4).
+              05 WS-CURR-MONTH          PIC 9(2).
+              05 WS-CURR-DAY            PIC 9(2).
+       PROCEDURE DIVISION.
+       0000-MAIN-PARA.
+              PERFORM 1000-INITIALIZE-PARA
+              THRU 1000-INITIALIZE-PARA-EXIT
+              PERFORM 2000-PROCESS-PARA
+              THRU 2000-PROCESS-PARA-EXIT
+              PERFORM 9000-TERMINATION-PARA
+              THRU 9000-TERMINATION-PARA-EXIT
+              .
+       0000-MAIN-PARA-EXIT.
+       1000-INITIALIZE-PARA.
+              PERFORM 2100-OPEN-PARA
+              THRU 2100-OPEN-PARA-EXIT
+              .
+       1000-INITIALIZE-PARA-EXIT.
+              EXIT.
+       2000-PROCESS-PARA.
+              PERFORM 2200-READ-PARA
+              THRU 2200-READ-PARA-EXIT UNTIL TI001-EOF
+              PERFORM 2300-CLOSE-PARA
+              THRU 2300-CLOSE-PARA-EXIT
+              .
+       2000-PROCESS-PARA-EXIT.
+              EXIT.
+       2100-OPEN-PARA.
+             OPEN INPUT TI001-PS1
+             EVALUATE TRUE
+             WHEN TI001-SUCCESS
+                 DISPLAY "FILE OPEN"
+             WHEN OTHER
+                 DISPLAY "FILE OPEN FAILED " WS-FST-TI001
+                 PERFORM 9000-TERMINATION-PARA
+             END-EVALUATE
+             OPEN OUTPUT TO001-PS2
+             EVALUATE TRUE
+             WHEN TO001-SUCCESS
+                 DISPLAY "FILE OPEN"
+             WHEN OTHER
+                 DISPLAY "FILE OPEN FAILED" WS-FST-TO001
+                 PERFORM 9000-TERMINATION-PARA
+             END-EVALUATE
+             .
+       2100-OPEN-PARA-EXIT.
+             EXIT.
+       2200-READ-PARA.
+             MOVE SPACES TO TI001-PS1-REC
+             MOVE SPACES TO TO001-PS2-REC
+             READ TI001-PS1
+             EVALUATE TRUE
+             WHEN TI001-SUCCESS
+                ADD 1 TO WS-COUNTER
+                DISPLAY WS-COUNTER
+                PERFORM 2110-EXPIRY-PARA
+                   THRU 2110-EXPIRY-PARA-EXIT
+             WHEN TI001-EOF
+                IF WS-COUNTER = 00
+                  DISPLAY " FILE TI001 IS EMPTY"
+                ELSE
+                  DISPLAY "NUMBER OF VALID RECORDS"
+                  DISPLAY "NUMBER OF INVALID  RECORDS"
+                  DISPLAY "ALL REC PROCESS"
+                END-IF
+             WHEN OTHER
+                  DISPLAY "TI001 READ FAILED " WS-FST-TI001
+                  .
+       2200-READ-PARA-EXIT.
+              EXIT.
+       2110-EXPIRY-PARA.
+              MOVE TI001-PROD-CODE TO TO001-PRODUCT-CODE
+              MOVE TI001-QUANTITY TO TO001-QUANTITY
+              MOVE TI001-ORDER-STATUS TO TO001-ORDER-STATUS
+              MOVE TI001-EXPIRY-DATE TO TO001-EXPIRY-DATE
+              MOVE TI001-EXPIRY-DATE(7:4) TO WS-YEAR
+              MOVE TI001-EXPIRY-DATE(4:2) TO WS-MONTH
+              MOVE TI001-EXPIRY-DATE(1:2) TO WS-DAY
+              MOVE FUNCTION CURRENT-DATE TO WS-CURRENT-DATE
+              EVALUATE TRUE
+              WHEN WS-CURR-YEAR > WS-YEAR
+                     MOVE 'EXPIRED' TO TO001-EXPIRY-STATUS
+                     MOVE 'NA' TO TO001-PRIORITY
+                     MOVE 'RETURN' TO TO001-ORDER-STATUS
+              WHEN WS-CURR-YEAR = WS-YEAR AND
+                   WS-CURR-MONTH > WS-MONTH
+                     MOVE 'EXPIRED' TO TO001-EXPIRY-STATUS
+                     MOVE 'NA' TO TO001-PRIORITY
+                     MOVE 'RETURN' TO TO001-ORDER-STATUS
+              WHEN WS-CURR-YEAR = WS-YEAR AND
+                   WS-CURR-MONTH = WS-MONTH AND
+                   WS-CURR-DAY >= WS-DAY
+                     MOVE 'EXPIRED' TO TO001-EXPIRY-STATUS
+                     MOVE 'NA' TO TO001-PRIORITY
+                     MOVE 'RETURN' TO TO001-ORDER-STATUS
+              WHEN OTHER
+                     MOVE 'NOTEXPIRED' TO TO001-EXPIRY-STATUS
+                     MOVE 'ORDER' TO TO001-PRIORITY
+                     IF TI001-QUANTITY >= 075
+                            MOVE 'HIGH' TO TO001-PRIORITY
+                     ELSE
+                            MOVE 'LOW' TO TO001-PRIORITY
+                     END-IF
+              END-EVALUATE
+              PERFORM 2112-WRITE-PARA
+              THRU 2112-WRITE-PARA-EXIT
+              .
+       2110-EXPIRY-PARA-EXIT.
+              EXIT.
+       2112-WRITE-PARA.
+              WRITE TO001-PS2-REC
+              .
+       2112-WRITE-PARA-EXIT.
+              EXIT.
+       2300-CLOSE-PARA.
+              CLOSE TI001-PS1 TO001-PS2
+              .
+       2300-CLOSE-PARA-EXIT.
+       9000-TERMINATION-PARA.
+              STOP RUN.
+       9000-TERMINATION-PARA-EXIT.
+              EXIT.
+

@@ -1,0 +1,32 @@
+//TECN132A JOB NOTIFY=&SYSUID                                           00010000
+//STEP010  EXEC PGM=SORT                                                00020000
+//SYSPRINT DD SYSOUT=*                                                  00030000
+//SYSOUT   DD SYSOUT=*                                                  00040000
+//SORTIN   DD DSN=TECN132.PROJECT.OUTPUT.SORT,DISP=SHR                  00050001
+//SORTOUT  DD DSN=TECN132.PROJECT.SORTED,DISP=SHR                       00060001
+//*            LIKE=TECN132.PROJECT.OUTPUT.SORT,VOL=SER=ZAPRD7          00061001
+//SYSIN    DD *                                                         00070000
+  SORT FIELDS=(45,2,CH,A,12,10,CH,A,3,2,CH,A)                           00080000
+/*                                                                      00090000
+//STEP020  EXEC PGM=IDCAMS                                              00100000
+//SYSPRINT DD SYSOUT=*                                                  00110000
+//SYSIN    DD *                                                         00120000
+  DEFINE GDG( -                                                         00130000
+         NAME(TECN132.PROJECT.BACKUP.GDG) -                             00140001
+         EMPTY                   -                                      00150000
+         NOSCRATCH               -                                      00160000
+         LIMIT(4))                                                      00170000
+/*                                                                      00180000
+//STEP030  EXEC PGM=IDCAMS                                              00190000
+//SYSPRINT DD SYSOUT=*                                                  00200000
+//DD1      DD DSN=TECN132.PROJECT.SORTED,DISP=SHR                       00210001
+//DD2      DD DSN=TECN132.PROJECT.BACKUP.GDG(+1),                       00220001
+//            DISP=(NEW,CATLG,DELETE),                                  00230000
+//            SPACE=(TRK,(10,10)),                                      00240000
+//            DCB=(LRECL=80,RECFM=FB,BLKSIZE=800,DSORG=PS)              00250000
+//SYSIN    DD *                                                         00260000
+  REPRO-                                                                00270000
+    INFILE(DD1) -                                                       00280000
+    OUTFILE(DD2)                                                        00290000
+/*                                                                      00300000
+

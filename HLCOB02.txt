@@ -1,0 +1,295 @@
+       IDENTIFICATION DIVISION.                                         00010007
+       PROGRAM-ID. HLCOB02.                                             00020007
+       ENVIRONMENT DIVISION.                                            00030007
+       INPUT-OUTPUT SECTION.                                            00040007
+       FILE-CONTROL.                                                    00050007
+           SELECT TO001-OUTPUT ASSIGN TO OUTPS3                         00060007
+           ORGANIZATION IS SEQUENTIAL                                   00070007
+           ACCESS IS SEQUENTIAL                                         00080007
+           FILE STATUS IS WS-FST-TO001                                  00090007
+           .                                                            00100007
+       DATA DIVISION.                                                   00110007
+       FILE SECTION.                                                    00120007
+      * FILE SECTION FOR OUTPUT REPORT                                  00121026
+       FD TO001-OUTPUT.                                                 00130007
+       01 TO001-OUTPUT-REC.                                             00140007
+           05 TO001-APPLICANT-ID    PIC X(10).                          00150007
+           05 FILLER                PIC X(3).                           00160007
+           05 TO001-NAME            PIC X(32).                          00170011
+           05 FILLER                PIC X(1).                           00180007
+           05 TO001-CURRENT-BAL-AMT PIC 9(7).9(2).                      00190012
+           05 FILLER                PIC X(6).                           00200012
+           05 TO001-AMT-PAID        PIC 9(7).9(2).                      00210007
+           05 FILLER                PIC X(08).                          00220011
+       WORKING-STORAGE SECTION.                                         00230007
+       01 WS-VARS.                                                      00240007
+           05 WS-FST-TO001     PIC 9(2).                                00250007
+              88 WS-FST-SUC1   VALUE 00.                                00260007
+              88 WS-FST-EOF1   VALUE 10.                                00270007
+           05 WS-CURR-DATE.                                             00280007
+              10 WS-CURR-YEAR    PIC X(4).                              00290007
+              10 WS-CURR-MONTH   PIC X(2).                              00300007
+              10 WS-CURR-DAY     PIC X(2).                              00310007
+              10 WS-CURR-HOUR    PIC X(2).                              00320007
+              10 WS-CURR-MNT     PIC X(2).                              00330007
+              10 WS-CURR-SEC     PIC X(2).                              00340007
+       01 WS-LAYOUT-VARS.                                               00350007
+           05 WS-PAGE1-HEADER1.                                         00360007
+            10 FILLER         PIC X(29).                                00370007
+            10 WS-TITLE       PIC X(21) VALUE 'PAYMENT DETAIL REPORT'.  00380007
+            10 FILLER         PIC X(30).                                00390007
+           05 WS-PAGE1-HEADER2.                                         00400007
+            10 WS-ITEM1          PIC X(05) VALUE 'DATE:'.               00410007
+            10 WS-CURRENT-DATE   PIC X(08).                             00420007
+            10 FILLER            PIC X(45).                             00430020
+            10 WS-ITEM2          PIC X(05) VALUE 'PAGE:'.               00440007
+            10 WS-PAGE           PIC X(02).                             00450018
+           05 WS-PAGE1-HEADER3.                                         00460007
+            10 WS-ITEM3          PIC X(05) VALUE 'TIME:'.               00470007
+            10 WS-CURRENT-TIME   PIC X(08).                             00480007
+            10 FILLER            PIC X(45).                             00490020
+            10 WS-ITEM4          PIC X(14) VALUE 'REPORT ID:1004'.      00500007
+           05 WS-MAIN-HEADER.                                           00510007
+            10 WS-COL1        PIC X(12) VALUE 'APPLICANT ID'.           00520007
+            10 FILLER         PIC X(1).                                 00530007
+            10 WS-COL2        PIC X(4) VALUE 'NAME'.                    00540015
+            10 FILLER         PIC X(29).                                00550015
+            10 WS-COL3        PIC X(15) VALUE 'CURRENT BAL AMT'.        00560007
+            10 FILLER         PIC X(1).                                 00570007
+            10 WS-COL4        PIC X(8) VALUE 'AMT PAID'.                00580007
+            10 FILLER         PIC X(10).                                00590015
+           05 WS-MAIN-LINE.                                             00600007
+            10 WS-COL1        PIC X(12) VALUE '------------'.           00610007
+            10 FILLER         PIC X(1).                                 00620007
+            10 WS-COL2        PIC X(4) VALUE '----'.                    00630015
+            10 FILLER         PIC X(29).                                00640015
+            10 WS-COL3        PIC X(15) VALUE '---------------'.        00650007
+            10 FILLER         PIC X(1).                                 00660007
+            10 WS-COL4        PIC X(8) VALUE '--------'.                00670007
+            10 FILLER         PIC X(10).                                00680015
+           05 WS-MAIN-EOP.                                              00690007
+            10 P-HYPEN        PIC X(32) VALUE ALL '-'.                  00700007
+            10 WS-EOP         PIC X(13) VALUE ' END OF PAGE '.          00710007
+            10 S-HYPEN        PIC X(35) VALUE ALL '-'.                  00720007
+           05 WS-PAGE2-HEADER1.                                         00730007
+            10 FILLER         PIC X(58).                                00740020
+            10 WS-ITEM5       PIC X(05) VALUE 'PAGE:'.                  00750021
+            10 WS-PAGE        PIC X(09).                                00760007
+           05 WS-PAGE2-HEADER2.                                         00770007
+            10 FILLER         PIC X(58).                                00780020
+            10 WS-ITEM5       PIC X(14) VALUE 'REPORT ID:1004'.         00790007
+           05 WS-LAST-EOR.                                              00800008
+            10 P-STAR         PIC X(32) VALUE ALL '*'.                  00810007
+            10 WS-EOP         PIC X(16) VALUE ' END OF REPORT '.        00820007
+            10 S-STAR         PIC X(32) VALUE ALL '*'.                  00830007
+           05 WS-PAGE-COUNTER PIC 9(02) VALUE 1.                        00840007
+           05 WS-REC-COUNTER  PIC 9(02) VALUE 0.                        00850007
+           05 WS-LINE-COUNTER PIC 9(02) VALUE 1.                        00860013
+      * INCLUDING DATABASE TABLES FOR JOB                               00861026
+           EXEC SQL                                                     00870007
+               INCLUDE SQLCA                                            00880007
+           END-EXEC.                                                    00890007
+           EXEC SQL                                                     00900007
+               INCLUDE DCLAPP                                           00910007
+           END-EXEC.                                                    00920007
+           EXEC SQL                                                     00930007
+               INCLUDE DCLPAY                                           00940007
+           END-EXEC.                                                    00950007
+      * DECLARATION OF CURSOR TO RETRIVE DATA FROM TABLES               00951026
+           EXEC SQL                                                     00960007
+               DECLARE HLCURS CURSOR                                    00970007
+               FOR SELECT P.APPLICANT_ID, P.CURRENT_BALANCE_AMOUNT,     00980007
+                    P.AMOUNT_PAID, A.APPLICANT_NAME                     00990007
+                   FROM PAYMENT_DB P INNER JOIN APPLICANT_DB A          01000007
+                   ON P.APPLICANT_ID = A.APPLICANT_ID INNER JOIN        01010007
+                    LOAN_DB L ON P.APPLICANT_ID = L.APPLICANT_ID        01020007
+                  WHERE L.LOAN_TYPE = 'HOUSING' AND                     01030026
+                     P.CURRENT_BALANCE_AMOUNT < 1000                    01040026
+           END-EXEC.                                                    01050007
+       PROCEDURE DIVISION.                                              01060007
+       0000-MAIN-PARA.                                                  01070007
+           PERFORM 1000-INIT-PARA                                       01080007
+           THRU 1000-INIT-PARA-EXIT                                     01090007
+           PERFORM 3000-PROC-PARA                                       01100007
+           THRU 3000-PROC-PARA-EXIT                                     01110007
+           PERFORM 9000-TERM-PARA                                       01120007
+           THRU 9000-TERM-PARA-EXIT                                     01130007
+           .                                                            01140007
+       0000-MAIN-PARA-EXIT.                                             01150007
+           EXIT.                                                        01160007
+       1000-INIT-PARA.                                                  01170007
+           INITIALIZE WS-VARS.                                          01180014
+       1000-INIT-PARA-EXIT.                                             01190007
+           EXIT.                                                        01200007
+       3000-PROC-PARA.                                                  01210007
+           PERFORM 3100-OPEN-PARA                                       01220007
+           THRU 3100-OPEN-PARA-EXIT                                     01230007
+           PERFORM 3200-FETCH-PARA                                      01240007
+           THRU 3200-FETCH-PARA-EXIT UNTIL SQLCODE = 100                01250007
+           PERFORM 5000-CLOSE-PARA                                      01260008
+           THRU 5000-CLOSE-PARA-EXIT                                    01270008
+           .                                                            01280007
+       3000-PROC-PARA-EXIT.                                             01290007
+           EXIT.                                                        01300007
+      * PARA TO OPEN REPORT PS AND CURSOR                               01301026
+       3100-OPEN-PARA.                                                  01310007
+           OPEN OUTPUT TO001-OUTPUT                                     01320007
+           EVALUATE TRUE                                                01330007
+           WHEN WS-FST-SUC1                                             01340007
+             DISPLAY 'SUCCESSFULLY OPENED'                              01350007
+           WHEN OTHER                                                   01360007
+             DISPLAY 'FILE OPEN ERROR' WS-FST-TO001                     01370007
+           END-EVALUATE                                                 01380007
+           EXEC SQL                                                     01390007
+               OPEN HLCURS                                              01400007
+           END-EXEC                                                     01410007
+           .                                                            01420007
+       3100-OPEN-PARA-EXIT.                                             01430007
+           EXIT.                                                        01440007
+      * PARA TO FETCH DATA FROM TABLE INTO HOST VARIABLES               01441026
+       3200-FETCH-PARA.                                                 01450007
+           MOVE SPACES TO TO001-OUTPUT-REC                              01460007
+           EXEC SQL                                                     01470007
+             FETCH HLCURS                                               01480007
+             INTO                                                       01490007
+                 :HVP-APPLICANT-ID                                      01500007
+                ,:HVP-CURRENT-BALANCE-AMOUNT                            01510007
+                ,:HVP-AMOUNT-PAID                                       01520007
+                ,:HVA-APPLICANT-NAME                                    01530007
+           END-EXEC                                                     01540007
+           ADD 1 TO WS-REC-COUNTER                                      01550007
+           PERFORM 4000-VALUES-PARA THRU                                01560008
+              4000-VALUES-PARA-EXIT                                     01570008
+           PERFORM 3210-CHECK-PARA THRU                                 01580009
+              3210-CHECK-PARA-EXIT                                      01590009
+           DISPLAY 'RECORD ' WS-REC-COUNTER ' WRITTEN'                  01600007
+           .                                                            01610007
+       3200-FETCH-PARA-EXIT.                                            01620007
+           EXIT.                                                        01630007
+      *PARA TO CHECK CONDITIONS AND CREATE PAGE BREAK LAYOUT            01631026
+       3210-CHECK-PARA.                                                 01640007
+           DISPLAY 'PAGE: ' WS-PAGE-COUNTER                             01641013
+                   'LINE: ' WS-LINE-COUNTER                             01642013
+      *FIRST PAGE                                                       01650007
+           EVALUATE TRUE                                                01660007
+           WHEN WS-PAGE-COUNTER = 1 AND WS-LINE-COUNTER <= 10           01670007
+               IF WS-LINE-COUNTER <= 5                                  01680008
+               MOVE WS-PAGE1-HEADER1 TO TO001-OUTPUT-REC                01690007
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        01700008
+               MOVE WS-PAGE1-HEADER2 TO TO001-OUTPUT-REC                01710007
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        01720008
+               MOVE WS-PAGE1-HEADER3 TO TO001-OUTPUT-REC                01730007
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        01740008
+               MOVE WS-MAIN-HEADER   TO TO001-OUTPUT-REC                01750007
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        01760008
+               MOVE WS-MAIN-LINE     TO TO001-OUTPUT-REC                01770007
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        01780008
+               END-IF                                                   01790007
+      *MOVING RECORDS ALONG WITH TRAILERS IN FIRST PAGE                 01800007
+               IF WS-LINE-COUNTER > 5 AND                               01810007
+                  WS-LINE-COUNTER < 10 AND SQLCODE = 0                  01820007
+               PERFORM 3212-RECORD-PARA                                 01830007
+               THRU 3212-RECORD-PARA-EXIT                               01840007
+               END-IF                                                   01850007
+               IF WS-LINE-COUNTER < 10 AND SQLCODE = 100                01860007
+               MOVE WS-MAIN-EOP      TO TO001-OUTPUT-REC                01870007
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        01880007
+               MOVE WS-LAST-EOR      TO TO001-OUTPUT-REC                01890007
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        01900007
+               DISPLAY 'PAGE: ' WS-PAGE-COUNTER                         01910007
+                       ' RECORDS WRITTEN: ' WS-REC-COUNTER              01920007
+               END-IF                                                   01930007
+      *TRAILER FOR FIRST PAGE                                           01940007
+               IF WS-LINE-COUNTER = 10                                  01950007
+               MOVE WS-MAIN-EOP      TO TO001-OUTPUT-REC                01960007
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        01970007
+               ADD 1 TO WS-PAGE-COUNTER                                 01980007
+               DISPLAY WS-LINE-COUNTER ' LINES WRITTEN'                 01990007
+               MOVE 1 TO WS-LINE-COUNTER                                02000007
+               DISPLAY 'ALL ' WS-REC-COUNTER ' RECORDS WRITTEN'         02010007
+               END-IF                                                   02020007
+      *REMAINING & LAST PAGE                                            02030007
+           WHEN WS-PAGE-COUNTER > 1 AND WS-LINE-COUNTER <= 10           02040008
+               IF WS-LINE-COUNTER <= 4                                  02050009
+               MOVE WS-PAGE2-HEADER1 TO TO001-OUTPUT-REC                02060007
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        02070008
+               MOVE WS-PAGE2-HEADER2 TO TO001-OUTPUT-REC                02080007
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        02090008
+               MOVE WS-MAIN-HEADER TO TO001-OUTPUT-REC                  02100007
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        02110008
+               MOVE WS-MAIN-LINE   TO TO001-OUTPUT-REC                  02120007
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        02130008
+               END-IF                                                   02131010
+      *MOVING RECORDS ALONG WITH TRAILERS IN REMAINING PAGES            02140007
+               IF WS-LINE-COUNTER > 4 AND                               02150007
+                  WS-LINE-COUNTER < 10 AND SQLCODE = 0                  02160007
+               PERFORM 3212-RECORD-PARA                                 02170007
+               THRU 3212-RECORD-PARA-EXIT                               02180007
+               END-IF                                                   02190007
+      *TRAILER FOR LAST PAGE                                            02200007
+               IF WS-LINE-COUNTER <= 10 AND SQLCODE = 100               02210025
+               MOVE WS-MAIN-EOP      TO TO001-OUTPUT-REC                02220007
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        02230007
+               MOVE WS-LAST-EOR      TO TO001-OUTPUT-REC                02240025
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        02250025
+               DISPLAY 'LAST PAGE ' WS-REC-COUNTER ' RECORDS WRITTEN'   02260007
+               END-IF                                                   02270007
+      *TRAILER FOR ALL PAGES                                            02280007
+               IF WS-LINE-COUNTER = 10 AND SQLCODE = 0                  02290025
+               MOVE WS-MAIN-EOP      TO TO001-OUTPUT-REC                02300007
+               PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT        02310007
+               DISPLAY 'PAGE: ' WS-PAGE-COUNTER                         02320007
+                       ' RECORDS WRITTEN: ' WS-REC-COUNTER              02330007
+               ADD 1 TO WS-PAGE-COUNTER                                 02340007
+               MOVE 1 TO WS-LINE-COUNTER                                02350007
+               END-IF                                                   02360007
+           WHEN OTHER                                                   02370008
+               DISPLAY 'ENTERED WHEN OTHER OF CHECK PARA'               02380007
+               .                                                        02390007
+       3210-CHECK-PARA-EXIT.                                            02400007
+           EXIT.                                                        02410007
+      * PARA TO WRITE INTO REPORT PS ALSO INCREMENTS LINE COUNTER       02411026
+       3211-WRITE-PARA.                                                 02420007
+               WRITE TO001-OUTPUT-REC                                   02430007
+               DISPLAY 'LINE WRITTEN IN OUTPUT REC'                     02440007
+               ADD 1 TO WS-LINE-COUNTER                                 02450007
+               .                                                        02460007
+       3211-WRITE-PARA-EXIT.                                            02470007
+           EXIT.                                                        02480007
+      * PARA TO WRITE ONLY RECORDS AS PER LAYOUT                        02481026
+       3212-RECORD-PARA.                                                02490007
+           MOVE HVP-APPLICANT-ID TO TO001-APPLICANT-ID                  02500007
+           MOVE HVP-CURRENT-BALANCE-AMOUNT                              02510007
+             TO TO001-CURRENT-BAL-AMT                                   02520007
+           MOVE HVP-AMOUNT-PAID TO TO001-AMT-PAID                       02530007
+           MOVE HVA-APPLICANT-NAME-TEXT TO TO001-NAME                   02540017
+           PERFORM 3211-WRITE-PARA THRU 3211-WRITE-PARA-EXIT            02550007
+           .                                                            02560007
+       3212-RECORD-PARA-EXIT.                                           02570007
+           EXIT.                                                        02580007
+      * PARA TO ASSIGN VALUES SUCH AS DATE AND PG NO TO VARIALBLES      02581026
+       4000-VALUES-PARA.                                                02590008
+           MOVE FUNCTION CURRENT-DATE TO WS-CURR-DATE                   02600007
+           STRING WS-CURR-YEAR WS-CURR-MNT WS-CURR-DAY                  02610007
+           DELIMITED BY SIZE INTO WS-CURRENT-DATE                       02620007
+           STRING WS-CURR-HOUR ':' WS-CURR-MNT ':' WS-CURR-SEC          02630007
+           DELIMITED BY SIZE INTO WS-CURRENT-TIME                       02640007
+           MOVE WS-PAGE-COUNTER TO WS-PAGE OF WS-PAGE1-HEADER2          02650007
+           MOVE WS-PAGE-COUNTER TO WS-PAGE OF WS-PAGE2-HEADER1          02660007
+           .                                                            02670007
+       4000-VALUES-PARA-EXIT.                                           02680008
+           EXIT.                                                        02690007
+      * PARA TO CLOSE CURSOR AND OUTPUT FILES                           02691026
+       5000-CLOSE-PARA.                                                 02700007
+           EXEC SQL                                                     02720007
+           CLOSE HLCURS                                                 02730007
+           END-EXEC                                                     02740007
+           CLOSE TO001-OUTPUT                                           02741026
+           .                                                            02750007
+       5000-CLOSE-PARA-EXIT.                                            02760007
+           EXIT.                                                        02770007
+       9000-TERM-PARA.                                                  02780007
+           STOP RUN.                                                    02790007
+       9000-TERM-PARA-EXIT.                                             02800022
+      *    EXIT.                                                        02810021
+

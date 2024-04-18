@@ -1,0 +1,63 @@
+//TECN132J JOB  NOTIFY=&SYSUID                                          00010003
+//* CREATION OF PS3                                                     00011003
+//STEP1    EXEC PGM=IEFBR14                                             00020000
+//DD1      DD   DSN=TECN132.L1B.STUDENT.PS3,                            00030000
+//         DISP=(NEW,CATLG,DELETE),                                     00040001
+//         VOLUME=SER=ZAPRD7,                                           00041001
+//         SPACE=(TRK,(5,5)),                                           00050001
+//         DCB=(LRECL=80,RECFM=FB,BLKSIZE=800,DSORG=PS)                 00051001
+//* STEPS TO REMOVE HEADERS IN PS1 AND PS2                              00052003
+//STEP2    EXEC PGM=SORT                                                00060000
+//SORTIN   DD   DSN=TECN132.L1B.STUDENT.PS1,DISP=SHR                    00070001
+//SORTOUT  DD   DSN=TECN132.L1B.STUDENT.PS1,DISP=SHR                    00080001
+//SYSPRINT DD SYSOUT=*                                                  00090001
+//SYSOUT   DD SYSOUT=*                                                  00100001
+//SYSIN    DD *                                                         00110001
+  SORT FIELDS=COPY,SKIPREC=1                                            00120001
+/*                                                                      00130001
+//STEP3    EXEC PGM=SORT                                                00140001
+//SORTIN   DD   DSN=TECN132.L1B.STUDENT.PS2,DISP=SHR                    00150001
+//SORTOUT  DD   DSN=TECN132.L1B.STUDENT.PS2,DISP=SHR                    00160001
+//SYSPRINT DD SYSOUT=*                                                  00170001
+//SYSOUT   DD SYSOUT=*                                                  00180001
+//SYSIN    DD *                                                         00190001
+  SORT FIELDS=COPY,SKIPREC=1                                            00200001
+/*                                                                      00210001
+//* MERGING OF PS1 AND PS2 INTO PS3                                     00211003
+//STEP4    EXEC PGM=SORT                                                00220001
+//SORTIN   DD DSN=TECN132.L1B.STUDENT.PS1,DISP=SHR                      00230001
+//         DD DSN=TECN132.L1B.STUDENT.PS2,DISP=SHR                      00240001
+//SORTOUT  DD DSN=TECN132.L1B.STUDENT.PS3,DISP=SHR                      00250001
+//SYSPRINT DD SYSOUT=*                                                  00260001
+//SYSOUT   DD SYSOUT=*                                                  00270001
+//SYSIN    DD *                                                         00280001
+  SORT FIELDS=COPY                                                      00290001
+/*                                                                      00300001
+//* ADDITION OF +1 TO STUDENT_ID IN PS3                                 00301003
+//STEP5    EXEC PGM=SORT                                                00310001
+//SORTIN   DD DSN=TECN132.L1B.STUDENT.PS3,DISP=SHR                      00320001
+//SORTOUT  DD DSN=TECN132.L1B.STUDENT.PS3,DISP=SHR                      00330001
+//SYSPRINT DD SYSOUT=*                                                  00340001
+//SYSOUT   DD SYSOUT=*                                                  00350001
+//SYSIN    DD *                                                         00360001
+  SORT FIELDS=COPY                                                      00370001
+  OUTREC OVERLAY=(1,5,ZD,ADD,+01,EDIT=(TTTTT))                          00380001
+/*                                                                      00390001
+//* ARRANGING STUDENT_ID IN ASCENDING ORDER                             00391003
+//STEP6    EXEC PGM=SORT                                                00400001
+//SORTIN   DD DSN=TECN132.L1B.STUDENT.PS3,DISP=SHR                      00410001
+//SORTOUT  DD DSN=TECN132.L1B.STUDENT.PS3,DISP=SHR                      00420001
+//SYSPRINT DD SYSOUT=*                                                  00430001
+//SYSOUT   DD SYSOUT=*                                                  00440001
+//SYSIN    DD *                                                         00450001
+  SORT FIELDS=(1,5,ZD,A)                                                00460001
+/*                                                                      00470001
+//* LOADING PS3 DATA INTO KSDS                                          00471003
+//STEP7    EXEC PGM=IDCAMS                                              00480002
+//SYSPRINT DD SYSOUT=*                                                  00490002
+//SYSOUT   DD SYSOUT=*                                                  00500002
+//SYSIN    DD *                                                         00510002
+  REPRO INDATASET(TECN132.L1B.STUDENT.PS3) -                            00520002
+        OUTDATASET(TECN132.L1B.STUDENT.REFER.KSDS)                      00530002
+/*                                                                      00540002
+

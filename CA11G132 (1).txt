@@ -1,0 +1,202 @@
+       IDENTIFICATION DIVISION.                                         00010013
+       PROGRAM-ID. CA11G132.                                            00020013
+       ENVIRONMENT DIVISION.                                            00030013
+       INPUT-OUTPUT SECTION.                                            00040013
+       FILE-CONTROL.                                                    00050013
+             SELECT TI001-PS ASSIGN TO DD1                              00060013
+                    ORGANIZATION    IS SEQUENTIAL                       00070013
+                    ACCESS MODE     IS SEQUENTIAL                       00080013
+                    FILE STATUS     IS WS-FST-TI001                     00090013
+             .                                                          00100013
+             SELECT TO001-KSDS ASSIGN TO DD2                            00110013
+                    ORGANIZATION      IS INDEXED                        00120013
+                    ACCESS MODE       IS RANDOM                         00130013
+                    RECORD KEY        IS TO001-ID
+                    FILE STATUS       IS WS-FST-TO001                   00150013
+             .                                                          00160013
+       DATA DIVISION.                                                   00170013
+       FILE SECTION.                                                    00180013
+       FD TI001-PS.                                                     00190013
+       01 TI001-PS-REC.                                                 00200013
+          05 TI001-ID          PIC 9(05).                               00210013
+          05 FILLER            PIC X(01).                               00220013
+          05 TI001-FNAME       PIC X(010).                              00230013
+          05 FILLER            PIC X(01).                               00240013
+          05 TI001-LNAME       PIC X(10).                               00250013
+          05 FILLER            PIC X(01).                               00260013
+          05 TI001-MARKS       PIC 9(2).9(2).                           00270013
+          05 FILLER            PIC X(47).                               00280013
+       FD TO001-KSDS.                                                   00290013
+       01 TO001-KSDS-REC.                                               00300013
+          05 TO001-ID          PIC X(06).                               00310013
+          05 FILLER            PIC X(01).                               00320013
+          05 TO001-NAME        PIC X(15).                               00330013
+          05 FILLER            PIC X(01).                               00340013
+          05 TO001-MARKS       PIC 9(2).9(2).                           00350013
+          05 FILLER            PIC X(01).                               00360013
+          05 TO001-PERCENTAGE  PIC 9(02).                               00370013
+          05 FILLER            PIC X(01).                               00380013
+          05 TO001-RESULT      PIC X(30).                               00390013
+          05 FILLER            PIC X(18).                               00400013
+       WORKING-STORAGE SECTION.
+       01 WS-VARS.                                                      00420013
+            05 WS-FST-TI001     PIC 9(02).                              00430013
+               88 TI001-SUCCESS VALUE 00.                               00440013
+               88 TI001-EOF     VALUE 10.                               00450013
+            05 WS-FST-TO001     PIC 9(02).                              00470013
+               88 TO001-SUCCESS VALUE 00.                               00480013
+               88 TO001-EOF     VALUE 10.                               00490013
+            05 WS-S             PIC X(01) VALUE "S".                        
+            05 WS-COUNTER       PIC 9(02) VALUE ZEROS.
+            05 WS-VALID-REC     PIC 9(02) VALUE ZEROS.
+            05 WS-INVALID-REC   PIC 9(02) VALUE ZEROS.
+            05 WS-NAME PIC X(10).
+            05 WS-PERCENTAGE     PIC 9(02) VALUE ZEROS.
+            05 NEW-RESULT         PIC X(13) VALUE SPACES.
+            05 WS-MARKS           PIC 99V99  VALUE ZEROS.
+       PROCEDURE DIVISION.                                              00510013
+       0000-MAIN-PARA.                                                  00520013
+              PERFORM 1000-INITIALIZE-PARA                              00530013
+                 THRU 1000-INITIALIZE-PARA-EXIT                         00540013
+              PERFORM 2000-PROCESS-PARA                                 00550013
+                 THRU 2000-PROCESS-PARA-EXIT                            00560013
+              PERFORM 9000-TERMINATION-PARA                             00570013
+                 .
+        0000-MAIN-PARA-EXIT.                                            00590013
+                EXIT.                                                   00600013
+        1000-INITIALIZE-PARA.                                           00610013
+                 CONTINUE.                                              00620013
+        1000-INITIALIZE-PARA-EXIT.
+                 EXIT.                                                  00640013
+        2000-PROCESS-PARA.                                              00650013
+             PERFORM 2100-OPEN-PARA                                     00660013
+                THRU 2100-OPEN-PARA-EXIT                                00670013
+             PERFORM 2200-READ-PARA                                     00680013
+                THRU 2200-READ-PARA-EXIT
+               UNTIL TI001-EOF
+             PERFORM 2300-CLOSE-PARA                                    00700013
+                THRU 2300-CLOSE-PARA-EXIT                               00710013
+                .                                                       00720013
+        2000-PROCESS-PARA-EXIT.                                         00730013
+                EXIT.                                                   00740013
+      *OPENING INPUT AND OUTPUT FILES 
+        2100-OPEN-PARA.                                                 00750013
+             OPEN INPUT TI001-PS                                        00760013
+             EVALUATE TRUE                                              00770013
+             WHEN TI001-SUCCESS                                         00780013
+                 DISPLAY "FILE OPEN"                                    00790013
+             WHEN OTHER                                                 00800013
+                 DISPLAY "FILE OPEN FAILED " WS-FST-TI001               00810013
+                 PERFORM 9000-TERMINATION-PARA                          00820013
+             END-EVALUATE                                               00830013
+             OPEN OUTPUT TO001-KSDS                                     00840013
+             EVALUATE TRUE                                              00850013
+             WHEN TO001-SUCCESS                                         00860013
+                 DISPLAY "FILE OPEN"                                    00870013
+             WHEN OTHER                                                 00880013
+                 DISPLAY "FILE OPEN FAILED" WS-FST-TO001                00890013
+                 PERFORM 9000-TERMINATION-PARA                          00900013
+             END-EVALUATE                                               00910013
+             .                                                          00920013
+        2100-OPEN-PARA-EXIT.                                            00930013
+             EXIT.                                                      00940013
+      *PARA TO READ INPUT FILE
+        2200-READ-PARA. 
+      *MOVING SPACES TO REMOVE GARBAGE VALUES                           00950013
+             MOVE SPACES TO TI001-PS-REC
+             MOVE SPACES TO TO001-KSDS-REC
+             READ TI001-PS 
+      *CHECKING IF THE READ IS SUCCESS/FAILED
+             EVALUATE TRUE                                              00970013
+             WHEN TI001-SUCCESS                                         00980013
+                ADD 1 TO WS-COUNTER                                     00990013
+                DISPLAY WS-COUNTER
+                PERFORM 2110-VALIDATE-PARA                              01000013
+                   THRU 2110-VALIDATE-PARA-EXIT                         01010013
+             WHEN TI001-EOF                                             01020013
+                IF WS-COUNTER = 00                                      01030013
+                  DISPLAY " FILE TI001 IS EMPTY"                        01040013
+                ELSE                                                    01050013
+                  DISPLAY "NUMBER OF VALID RECORDS" WS-VALID-REC        01060013
+                  DISPLAY "NUMBER OF INVALID  RECORDS" WS-INVALID-REC   01070013
+                  DISPLAY "ALL REC PROCESS"                             01080013
+                END-IF
+             WHEN OTHER                                                 01090013
+                  DISPLAY "TI001 READ FAILED " WS-FST-TI001             01100013
+                  .                                                     01110013
+       2200-READ-PARA-EXIT.                                             01120013
+              EXIT.                                                     01130013
+      *VALIDATION PARA TO ACCEPT ONLY VALID RECORDS 
+       2110-VALIDATE-PARA.                                              01140013
+           EVALUATE TRUE                                                01150013
+           WHEN  TI001-ID         IS NUMERIC            AND             01160013
+                 TI001-FNAME      IS GREATER THAN SPACE AND             01170013
+                 TI001-LNAME      IS ALPHABETIC         AND             01190013
+                 TI001-MARKS(1:2) IS NUMERIC            AND             01200013
+                 TI001-MARKS(4:2) IS NUMERIC                            01220013
+                   ADD 1 TO WS-VALID-REC                                01230013
+                   DISPLAY "INPUT FILE TI001 RECORD : " TI001-PS-REC
+                   PERFORM 2111-CALCI-PARA                              01240013
+                      THRU 2111-CALCI-PARA-EXIT                         01250013
+              WHEN OTHER                                                01260013
+                   ADD 1 TO WS-INVALID-REC                              01270013
+                  DISPLAY "INVALID REC :" WS-FST-TI001                  01280013
+              END-EVALUATE                                              01290013
+              .                                                         01300013
+       2110-VALIDATE-PARA-EXIT.
+              EXIT.
+      *CALCULATION AND REFERENCE MODIFICATION PARA 
+       2111-CALCI-PARA.
+      *REFERENCE MODIFICATION ON NAME
+              MOVE WS-S(1:1) TO TO001-ID(1:1)
+              MOVE TI001-ID(1:5) TO TO001-ID(2:5)
+              MOVE TI001-FNAME TO WS-NAME
+      *REMOVAL OF INVALID CHARACTERS IN NAME        
+              INSPECT WS-NAME REPLACING ALL '@' BY SPACE
+                                            '%' BY SPACE
+                                            '$' BY SPACE
+                                            '@' BY SPACE
+                                            '&' BY SPACE
+              MOVE TI001-LNAME(1:1) TO TO001-NAME(1:1)
+              MOVE "."  TO TO001-NAME(2:1)
+              MOVE WS-NAME(1:8) TO TO001-NAME(3:8)
+              MOVE TI001-MARKS TO TO001-MARKS
+              MOVE TI001-MARKS TO WS-MARKS
+              MOVE ZERO TO WS-PERCENTAGE
+      *CALLING SUB-PROGRAM TO CALCULATE PERCENTAGE        
+              CALL 'CA21G132' USING WS-MARKS WS-PERCENTAGE
+              MOVE WS-PERCENTAGE TO TO001-PERCENTAGE
+      *CHECKING OF RESULTS BASED ON PERCENTAGE        
+              EVALUATE TRUE
+              WHEN WS-PERCENTAGE >= 70
+                 MOVE "CONGRATULATIONS!!!" TO TO001-RESULT
+              WHEN WS-PERCENTAGE < 70
+                 MOVE "BETTER LUCK NEXT TIME!!!" TO TO001-RESULT
+              END-EVALUATE
+              PERFORM 2112-WRITE-PARA                                   01410013
+                     THRU 2112-WRITE-EXIT-PARA                          01420013
+              .
+       2111-CALCI-PARA-EXIT.                                            01430013
+              EXIT.                                                     01440013
+      *PARA TO WRITE INTO OUTPUT KSDS 
+       2112-WRITE-PARA.                                                 01450013
+              DISPLAY "OUTPUT FILE TO001 REC : " TO001-KSDS-REC
+              WRITE TO001-KSDS-REC
+              EVALUATE TRUE                                             01470013
+              WHEN TO001-SUCCESS                                        01480013
+                DISPLAY "RECORD WRITTEN  "                              01490013
+              WHEN OTHER                                                01500013
+                DISPLAY "RECORDS PROCESSING FAILED " WS-FST-TO001       01510013
+              END-EVALUATE                                              01530013
+               .                                                        01540013
+       2112-WRITE-EXIT-PARA.                                            01550013
+               EXIT.                                                    01560013
+      *PARA TO CLOSE THE INPUT AND OUTPUT FILES
+       2300-CLOSE-PARA.                                                 01570013
+               CLOSE TI001-PS TO001-KSDS                                01580013
+               .                                                        01590013
+       2300-CLOSE-PARA-EXIT.                                            01600013
+                EXIT.                                                   01610013
+       9000-TERMINATION-PARA.                                           01620013
+                STOP RUN.                                               01630013
+       9000-TERMINATION-PARA-EXIT.                                      01640013

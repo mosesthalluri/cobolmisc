@@ -1,0 +1,198 @@
+       IDENTIFICATION DIVISION.                                         
+       PROGRAM-ID. ICT03CBM.                                            
+       ENVIRONMENT DIVISION.                                            
+       INPUT-OUTPUT SECTION.                                            
+       FILE-CONTROL.                                                    
+                   SELECT TI001-KSDS ASSIGN TO INPKSDS                  
+                          ORGANIZATION IS INDEXED                       
+                          RECORD KEY IS TI001-BOOK-NO                   
+                          ACCESS IS SEQUENTIAL                          
+                          FILE STATUS IS WS-FST-TI001.                  
+                   SELECT TO001-KSDS ASSIGN TO OUTKSDS                    
+                          ORGANIZATION IS INDEXED                       
+                          RECORD KEY IS TO001-BOOK-NO
+                          ACCESS IS SEQUENTIAL                          
+                          FILE STATUS IS WS-FST-TO001.                  
+       DATA DIVISION.                                                   
+       FILE SECTION.                                                    
+       FD TI001-KSDS.                                                   
+       01 TI001-KSDS-REC.                                               
+           05 TI001-BOOK-NO           PIC X(09).                        
+           05 FILLER                  PIC X(01).                        
+           05 TI001-BOOK-NAME         PIC X(25).                        
+           05 FILLER                  PIC X(01).                        
+           05 TI001-BOOK-PRICE        PIC 9(04).9(03).                  
+           05 FILLER                  PIC X(01).                        
+           05 TI001-SYMBOL            PIC X(07).                        
+           05 FILLER                  PIC X(28).                        
+       FD TO001-KSDS.                                                     
+       01 TO001-KSDS-REC.                                                 
+           05 TO001-BOOK-NO           PIC X(09).                        
+           05 FILLER                  PIC X(01).                        
+           05 TO001-BOOK-NAME         PIC X(25).                        
+           05 FILLER                  PIC X(01).                        
+           05 TO001-BOOK-PRICE        PIC 9(04).9(02).                  
+           05 FILLER                  PIC X(01).                        
+           05 TO001-SYMBOL            PIC X(07).                        
+           05 FILLER                  PIC X(29).                        
+       WORKING-STORAGE SECTION.                                         
+       01 WS-VARS.                                                      
+           05 WS-FST-TI001   PIC 9(02).                                  
+           05 WS-FST-TO001   PIC 9(02).                                                                   
+           05 WS-COUNTER     PIC 9(2).                                   
+           05 WS-BOOK-PRICE  PIC 9(04)V9(03).
+           05 WS-NEW-PRICE   PIC 9(04)V9(02). 
+           05 WS-CHECK-PRICE PIC 9(04)V9(02).
+       01 WS-TABLE.
+           05 WS-BOOK-TABLE OCCURS 7 TIMES.
+               10 WS-TABLE-BOOK-NO        PIC 9(09).
+               10 WS-TABLE-BOOK-NAME      PIC X(25).
+               10 WS-TABLE-BOOK-PRICE     PIC 9(4).9(2).
+               10 WS-TABLE-SYMBOL         PIC X(7).                             
+       PROCEDURE DIVISION.                                              
+       0000-MAIN-PARA.                                                  
+           PERFORM 1000-INIT-PARA                                       
+              THRU 1000-INIT-PARA-EXIT                                  
+           PERFORM 2000-PROC-PARA                                       
+              THRU 2000-PROC-PARA-EXIT                                  
+           PERFORM 9000-TERM-PARA                                       
+              THRU 9000-TERM-PARA-EXIT                                  
+           .                                                            
+       1000-INIT-PARA.                                                  
+           CONTINUE                                                     
+           .                                                            
+       1000-INIT-PARA-EXIT.                                             
+           EXIT                                                         
+           .                                                            
+       2000-PROC-PARA.                                                  
+           PERFORM 2100-OPEN-PARA                                       
+              THRU 2100-OPEN-PARA-EXIT                                  
+           PERFORM 2200-READ-PARA                                       
+              THRU 2200-READ-PARA-EXIT                                  
+             UNTIL WS-FST-TI001 = 10 
+           MOVE 0 TO WS-COUNTER
+           PERFORM 3000-TABLE-PARA
+           THRU 3000-TABLE-PARA-EXIT 7 TIMES                                   
+           PERFORM 2300-CLOSE-PARA                                      
+              THRU 2300-CLOSE-PARA-EXIT                                 
+           .                                                            
+       2000-PROC-PARA-EXIT.                                             
+           EXIT                                                         
+           .                                                            
+       9000-TERM-PARA.                                                  
+           CONTINUE                                                     
+           .                                                            
+       9000-TERM-PARA-EXIT.                                             
+           STOP RUN                                                     
+           .                                                            
+       2100-OPEN-PARA.                                                  
+           OPEN I-O TI001-KSDS                                          
+           EVALUATE TRUE                                                
+              WHEN WS-FST-TI001 = 00                                    
+                  DISPLAY 'TI001-KSDS HAS OPENED'                       
+              WHEN OTHER                                                
+                  DISPLAY 'OPENING OF TI001-KSDS HAS FAILED'            
+                  DISPLAY 'THE FILE STATUS CODE IS: ' WS-FST-TI001      
+                  PERFORM 9000-TERM-PARA                                
+                     THRU 9000-TERM-PARA-EXIT                           
+           END-EVALUATE                                                 
+           OPEN OUTPUT TO001-KSDS                                         
+           EVALUATE TRUE                                                
+              WHEN WS-FST-TO001 = 00                                    
+                  DISPLAY 'TO001-PS HAS OPENED'                         
+              WHEN OTHER                                                
+                  DISPLAY 'OPENING OF TO001-PS HAS FAILED'              
+                  DISPLAY 'THE FILE STATUS CODE IS: ' WS-FST-TO001      
+                  PERFORM 9000-TERM-PARA                                
+                     THRU 9000-TERM-PARA-EXIT                           
+           END-EVALUATE                                                 
+           .                                                            
+       2100-OPEN-PARA-EXIT.                                             
+           EXIT                                                         
+           .                                                            
+       2300-CLOSE-PARA.                                                 
+           CLOSE TI001-KSDS                                             
+           CLOSE TO001-KSDS                                               
+           .                                                            
+       2300-CLOSE-PARA-EXIT.                                            
+           EXIT                                                         
+           .                                                            
+       2200-READ-PARA.                                                  
+           MOVE SPACES TO TI001-KSDS-REC                                
+           MOVE SPACES TO TO001-KSDS-REC                                
+           READ TI001-KSDS                                              
+           EVALUATE TRUE                                                
+              WHEN WS-FST-TI001 = 00                                    
+                  ADD 1 TO WS-COUNTER                                   
+                  DISPLAY 'RECORD ' WS-COUNTER  'SUCCESSFULLY READ'    
+                  PERFORM 2210-VALID-PARA                          
+                     THRU 2210-VALID-PARA-EXIT                     
+              WHEN WS-FST-TI001 = 10                                    
+                  IF WS-COUNTER = 0                                     
+                     DISPLAY 'THE FILE IS EMPTY'                        
+                  ELSE                                                  
+                     DISPLAY 'ALL RECORDS PROCESSED'                    
+                  END-IF                                                
+              WHEN OTHER                                                
+                  DISPLAY 'READ FAILED FOR TI001'                       
+                  DISPLAY 'THE FILE STATUS CODE IS: ' WS-FST-TI001      
+           END-EVALUATE                                                 
+           .                                                            
+       2200-READ-PARA-EXIT.                                             
+           EXIT                                                         
+           .                                                            
+       2210-VALID-PARA.                                            
+           EVALUATE TRUE
+               WHEN TI001-BOOK-NO > ZEROS AND
+                   TI001-BOOK-NAME > SPACES AND
+                   TI001-BOOK-PRICE(1:4) IS NUMERIC AND
+                   TI001-BOOK-PRICE(6:3) IS NUMERIC 
+                     PERFORM 2212-CALC-PARA
+                     THRU 2212-CALC-PARA-EXIT
+               WHEN OTHER
+                     CONTINUE
+           END-EVALUATE     
+                  .                                                     
+       2210-VALID-PARA-EXIT.                                       
+               EXIT                                                     
+               .    
+       2212-CALC-PARA.
+           INSPECT TI001-SYMBOL REPLACING ALL "&" BY " "
+                                              "$" BY " "
+                                              "@" BY " "
+                                              "!" BY " "
+                                              "#" BY " "
+           MOVE TI001-BOOK-PRICE TO WS-BOOK-PRICE
+           COMPUTE WS-NEW-PRICE ROUNDED = ( WS-BOOK-PRICE * 1.5 )
+                                           / 2.5
+      *LOADING DATA INTO TABLE
+           MOVE TI001-BOOK-NO TO WS-TABLE-BOOK-NO(WS-COUNTER)
+           MOVE TI001-BOOK-NAME TO WS-TABLE-BOOK-NAME(WS-COUNTER)
+           MOVE WS-NEW-PRICE TO WS-TABLE-BOOK-PRICE(WS-COUNTER)
+           MOVE TI001-SYMBOL TO WS-TABLE-SYMBOL(WS-COUNTER)
+           . 
+       2212-CALC-PARA-EXIT.
+               EXIT.                                                                                                    
+       3000-TABLE-PARA.
+           ADD 1 TO WS-COUNTER
+           MOVE WS-TABLE-BOOK-PRICE(WS-COUNTER) TO WS-CHECK-PRICE        
+           EVALUATE TRUE 
+           WHEN WS-CHECK-PRICE > 1000.00
+               MOVE WS-TABLE-BOOK-NO(WS-COUNTER) TO TO001-BOOK-NO
+               MOVE WS-TABLE-BOOK-NAME(WS-COUNTER) TO TO001-BOOK-NAME
+               MOVE WS-TABLE-BOOK-PRICE(WS-COUNTER) TO TO001-BOOK-PRICE
+               MOVE WS-TABLE-SYMBOL(WS-COUNTER) TO TO001-SYMBOL
+               PERFORM 2211-WRITE-PARA                               
+               THRU 2211-WRITE-PARA-EXIT
+           WHEN OTHER
+               CONTINUE
+           END-EVALUATE
+                     . 
+       3000-TABLE-PARA-EXIT.
+               EXIT.
+       2211-WRITE-PARA.                                                                    
+               WRITE TO001-KSDS-REC                                       
+               .                                                        
+       2211-WRITE-PARA-EXIT.                                            
+               EXIT                                                     
+               .                                                        

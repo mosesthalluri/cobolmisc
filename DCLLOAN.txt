@@ -1,0 +1,65 @@
+      ******************************************************************
+      * DCLGEN TABLE(LOAN_DB)                                          *
+      *        LIBRARY(TECN132.PROJECT.PDS(DCLLOAN))                   *
+      *        ACTION(REPLACE)                                         *
+      *        LANGUAGE(COBOL)                                         *
+      *        NAMES(HV-)                                              *
+      *        QUOTE                                                   *
+      *        COLSUFFIX(YES)                                          *
+      * ... IS THE DCLGEN COMMAND THAT MADE THE FOLLOWING STATEMENTS   *
+      ******************************************************************
+           EXEC SQL DECLARE LOAN_DB TABLE
+           ( APPLICANT_ID                   CHAR(10) NOT NULL,
+             LOAN_ID                        CHAR(2),
+             LOAN_TYPE                      CHAR(10),
+             APPROVED_LOAN_AMOUNT           INTEGER,
+             LOAN_APPROVAL_DATE             DATE,
+             LOAN_TENURE                    CHAR(2),
+             FIXED_INTEREST_RATE            DECIMAL(3, 1),
+             LOAN_INDICATOR                 CHAR(5),
+             REPAYMENT_DAY                  CHAR(2),
+             TOTAL_REPAYMENT_AMOUNT         INTEGER,
+             MONTHLY_REPAYMENT_AMOUNT       DECIMAL(9, 2),
+             NEXT_REPAYMENT_DUE_DATE        DATE,
+             BALANCE_AMOUNT                 DECIMAL(9, 2)
+           ) END-EXEC.
+      ******************************************************************
+      * COBOL DECLARATION FOR TABLE LOAN_DB                            *
+      ******************************************************************
+       01  DCLLOAN-DB.
+      *                       APPLICANT_ID
+           10 HV-APPLICANT-ID      PIC X(10).
+      *                       LOAN_ID
+           10 HV-LOAN-ID           PIC X(2).
+      *                       LOAN_TYPE
+           10 HV-LOAN-TYPE         PIC X(10).
+      *                       APPROVED_LOAN_AMOUNT
+           10 HV-APPROVED-LOAN-AMOUNT
+              PIC S9(9) USAGE COMP.
+      *                       LOAN_APPROVAL_DATE
+           10 HV-LOAN-APPROVAL-DATE
+              PIC X(10).
+      *                       LOAN_TENURE
+           10 HV-LOAN-TENURE       PIC X(2).
+      *                       FIXED_INTEREST_RATE
+           10 HV-FIXED-INTEREST-RATE
+              PIC S9(2)V9(1) USAGE COMP-3.
+      *                       LOAN_INDICATOR
+           10 HV-LOAN-INDICATOR    PIC X(5).
+      *                       REPAYMENT_DAY
+           10 HV-REPAYMENT-DAY     PIC X(2).
+      *                       TOTAL_REPAYMENT_AMOUNT
+           10 HV-TOTAL-REPAYMENT-AMOUNT
+              PIC S9(9) USAGE COMP.
+      *                       MONTHLY_REPAYMENT_AMOUNT
+           10 HV-MONTHLY-REPAYMENT-AMOUNT
+              PIC S9(7)V9(2) USAGE COMP-3.
+      *                       NEXT_REPAYMENT_DUE_DATE
+           10 HV-NEXT-REPAYMENT-DUE-DATE
+              PIC X(10).
+      *                       BALANCE_AMOUNT
+           10 HV-BALANCE-AMOUNT    PIC S9(7)V9(2) USAGE COMP-3.
+      ******************************************************************
+      * THE NUMBER OF COLUMNS DESCRIBED BY THIS DECLARATION IS 13      *
+      ******************************************************************
+

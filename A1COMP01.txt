@@ -1,0 +1,11 @@
+//TECN132C JOB ,,NOTIFY=&SYSUID,CLASS=A,MSGLEVEL=(1,1),MSGCLASS=H       00010007
+//JOBPROC  JCLLIB ORDER=IBMUSER.ALL1                                    00020000
+//EXEC1    EXEC DB2JCL,                                                 00030000
+//         SRCLIB=TECN132.PROJECT.PDS,     ==> SOURCE LIB               00040005
+//         DBRMLIB=TECN132.DB2.DBRM,      ==> DBRM LIBRARY              00050002
+//         MEM=HLCOB01,                 ==> MEMBER NAME                 00060006
+//         INCLIB=TECN132.PROJECT.PDS,  ==> DCLGEN LIBRARY              00070006
+//         DCLLIB=TECN132.PROJECT.PDS,     ==> DCLGEN LIBRARY           00080006
+//         COPYLIB=TECN132.PROJECT.PDS,  ==> SOURCE LIBRARY             00090005
+//         LOADLIB=TECN132.DB2.LOADLIB       ==> LOAD LIBRARY           00100002
+

@@ -1,0 +1,275 @@
+       IDENTIFICATION DIVISION.                                         00010027
+       PROGRAM-ID. HLCOB01.                                             00020027
+       ENVIRONMENT DIVISION.                                            00030027
+       INPUT-OUTPUT SECTION.                                            00040027
+       FILE-CONTROL.                                                    00050027
+      * FILE SECTION FOR OUTPUT DETAILS PS                              00051033
+           SELECT TO001-OUTPUT ASSIGN TO OUTPS1                         00060027
+           ORGANIZATION IS SEQUENTIAL                                   00070027
+           ACCESS IS SEQUENTIAL                                         00080027
+           FILE STATUS IS WS-FST-TO001                                  00090027
+           .                                                            00091029
+      * FILE SECTION FOR CSV FILE                                       00092033
+           SELECT TO002-OUTPUT ASSIGN TO OUTPS2                         00100027
+           ORGANIZATION IS SEQUENTIAL                                   00110027
+           ACCESS IS SEQUENTIAL                                         00120027
+           FILE STATUS IS WS-FST-TO002                                  00130027
+           .                                                            00140027
+       DATA DIVISION.                                                   00150027
+       FILE SECTION.                                                    00160027
+      * FILE DESCRIPTION FOR OUTPUT PS FILE                             00161033
+       FD TO001-OUTPUT.                                                 00170027
+       01 TO001-OUTPUT-REC.                                             00180027
+           05 TO001-REPORT-DATE     PIC X(10).                          00190027
+           05 FILLER                PIC X(1).                           00200027
+           05 TO001-APPLICANT-ID    PIC X(10).                          00210027
+           05 FILLER                PIC X(1).                           00220027
+           05 TO001-LOAN-ID         PIC X(2).                           00230027
+           05 FILLER                PIC X(1).                           00240027
+           05 TO001-LOAN-TYPE       PIC X(10).                          00250027
+           05 FILLER                PIC X(1).                           00260027
+           05 TO001-DUE-DATE        PIC X(10).                          00270027
+           05 FILLER                PIC X(1).                           00280027
+           05 TO001-MON-REP-AMT     PIC 9(7).9(2).                      00290027
+           05 FILLER                PIC X(23).                          00300027
+      * FILE DESCRIPTION FOR CSV FILE                                   00301033
+       FD TO002-OUTPUT.                                                 00310027
+       01 TO002-OUTPUT-REC          PIC X(80).                          00320027
+       WORKING-STORAGE SECTION.                                         00330027
+      * INCLUDING DATABASE TABLES FOR JOB                               00331033
+           EXEC SQL                                                     00340027
+           INCLUDE SQLCA                                                00350027
+           END-EXEC.                                                    00360027
+           EXEC SQL                                                     00370027
+           INCLUDE DCLLOAN                                              00380027
+           END-EXEC.                                                    00390027
+           EXEC SQL                                                     00400027
+           INCLUDE DCLPAY                                               00410027
+           END-EXEC.                                                    00420027
+           EXEC SQL                                                     00430027
+      * DECLARING OF CURSOR TO RETRIEVE DATA FROM TABLES                00431033
+           DECLARE HLCURS CURSOR                                        00440027
+           FOR SELECT L.APPLICANT_ID,L.LOAN_ID,L.LOAN_TYPE,             00450027
+                L.NEXT_REPAYMENT_DUE_DATE, L.MONTHLY_REPAYMENT_AMOUNT,  00460027
+                P.AMOUNT_PAID_DATE, L.BALANCE_AMOUNT                    00470027
+           FROM LOAN_DB L INNER JOIN PAYMENT_DB P                       00480027
+                ON L.APPLICANT_ID = P.APPLICANT_ID                      00480027
+           WHERE L.APPLICANT_ID = P.APPLICANT_ID AND                    00490027
+                 L.LOAN_ID = P.LOAN_ID AND L.LOAN_TYPE='HOUSING'        00500027
+                AND L.LOAN_INDICATOR='OPEN'                             00510027
+           END-EXEC.                                                    00520027
+      * VARIABLES TO HOLD FILE STATUS CONDITIONS                        00521033
+       01 WS-CONDS.                                                     00530032
+           05 WS-FST-TO001     PIC 9(2).                                00540027
+              88 WS-FST-SUC1   VALUE 00.                                00550027
+              88 WS-FST-EOF1   VALUE 10.                                00560027
+           05 WS-FST-TO002     PIC 9(2).                                00570027
+              88 WS-FST-SUC2   VALUE 00.                                00580027
+              88 WS-FST-EOF2   VALUE 10.                                00590027
+      * VARIABLES TO HOLD ERROR MESSAGES                                00590133
+           05 WS-ERR-MSG.                                               00590233
+               10 WS-ERR-MSG-LEN       PIC S9(4) USAGE COMP VALUE 800.  00590333
+               10 WS-ERR-MSG-TEXT      PIC X(80) OCCURS 10 TIMES.       00590433
+           05 WS-ERR-LRECL             PIC S9(9) USAGE COMP VALUE 80.   00590533
+      * VARIABLES TO HOLD DATA                                          00590633
+       01 WS-VARS.                                                      00591032
+           05 WS-DAYS          PIC 9(9).                                00600027
+           05 WS-COUNTER       PIC 9(3).                                00610027
+           05 WS-DUE-DATE      PIC 9(8).                                00620027
+           05 WS-PAID-DATE     PIC 9(8).                                00630027
+           05 WS-CURR-DATE.                                             00640027
+              10 WS-CURR-YEAR      PIC 9(4).                            00650027
+              10 WS-CURR-MONTH     PIC 9(2).                            00660027
+              10 WS-CURR-DAY       PIC 9(2).                            00670027
+           05 WS-DUE-GDATE.                                             00680027
+              10 WS-DUE-YEAR      PIC 9(4).                             00690027
+              10 WS-DUE-MONTH     PIC 9(2).                             00700027
+              10 WS-DUE-DAY       PIC 9(2).                             00710027
+           05 WS-PAID-GDATE.                                            00720027
+              10 WS-PAID-YEAR      PIC 9(4).                            00730027
+              10 WS-PAID-MONTH     PIC 9(2).                            00740027
+              10 WS-PAID-DAY       PIC 9(2).                            00750027
+       PROCEDURE DIVISION.                                              00760027
+       0000-MAIN-PARA.                                                  00770027
+           PERFORM 1000-INIT-PARA                                       00780027
+           THRU 1000-INIT-PARA-EXIT                                     00790027
+           PERFORM 3000-PROC-PARA                                       00800027
+           THRU 3000-PROC-PARA-EXIT                                     00810027
+           PERFORM 9000-TERM-PARA                                       00820027
+           THRU 9000-TERM-PARA-EXIT                                     00830027
+           .                                                            00840027
+       0000-MAIN-PARA-EXIT.                                             00850027
+           EXIT.                                                        00860027
+       1000-INIT-PARA.                                                  00870027
+           INITIALIZE WS-VARS.                                          00880027
+       1000-INIT-PARA-EXIT.                                             00890027
+           EXIT.                                                        00900027
+       3000-PROC-PARA.                                                  00910027
+           PERFORM 3100-OPEN-PARA                                       00920027
+           THRU 3100-OPEN-PARA-EXIT                                     00930027
+           PERFORM 3200-FETCH-PARA                                      00940027
+           THRU 3200-FETCH-PARA-EXIT UNTIL SQLCODE = 100                00950027
+           PERFORM 3300-CLOSE-PARA                                      00960027
+           THRU 3300-CLOSE-PARA-EXIT                                    00970027
+           .                                                            00980027
+       3000-PROC-PARA-EXIT.                                             00990027
+           EXIT.                                                        01000027
+      *OPEN PARA TO OPEN OUTPUT PS FILE AND CURSOR                      01001033
+       3100-OPEN-PARA.                                                  01010027
+           OPEN OUTPUT TO001-OUTPUT                                     01020027
+           EVALUATE TRUE                                                01030027
+           WHEN WS-FST-SUC1                                             01040027
+             DISPLAY 'SUCCESSFULLY OPENED'                              01050027
+           WHEN OTHER                                                   01060027
+             DISPLAY 'FILE OPEN ERROR' WS-FST-TO001                     01070027
+           END-EVALUATE                                                 01080027
+           OPEN OUTPUT TO002-OUTPUT                                     01090027
+           EVALUATE TRUE                                                01100027
+           WHEN WS-FST-SUC2                                             01110027
+             DISPLAY 'SUCCESSFULLY OPENED'                              01120027
+           WHEN OTHER                                                   01130027
+             DISPLAY 'FILE OPEN ERROR' WS-FST-TO002                     01140027
+           END-EVALUATE                                                 01150027
+           EXEC SQL                                                     01160027
+               OPEN HLCURS                                              01170027
+           END-EXEC                                                     01180027
+           .                                                            01190027
+       3100-OPEN-PARA-EXIT.                                             01200027
+           EXIT.                                                        01210027
+      * PARA TO FETCH DATA FROM DATABASE                                01211033
+       3200-FETCH-PARA.                                                 01220027
+           MOVE SPACES TO TO001-OUTPUT-REC                              01230027
+           MOVE SPACES TO TO002-OUTPUT-REC                              01240027
+           EXEC SQL                                                     01250027
+             FETCH HLCURS                                               01260027
+             INTO                                                       01270027
+                 :HV-APPLICANT-ID                                       01280027
+                ,:HV-LOAN-ID                                            01290027
+                ,:HV-LOAN-TYPE                                          01300027
+                ,:HV-NEXT-REPAYMENT-DUE-DATE                            01310027
+                ,:HV-MONTHLY-REPAYMENT-AMOUNT                           01320027
+                ,:HVP-AMOUNT-PAID-DATE                                  01330027
+                ,:HV-BALANCE-AMOUNT                                     01340027
+           END-EXEC                                                     01350027
+           EVALUATE TRUE                                                01351033
+           WHEN SQLCODE = 00                                            01352033
+               DISPLAY 'FETCHED SUCCESSFULLY'                           01353033
+           WHEN SQLCODE = 100                                           01354033
+               DISPLAY 'END OF FILE REACHED'                            01355033
+           WHEN OTHER                                                   01356033
+               CALL 'DSNTIAR' USING SQLCA WS-ERR-MSG WS-ERR-LRECL       01357033
+               DISPLAY WS-ERR-MSG                                       01358033
+           END-EVALUATE                                                 01359033
+      * MOVING CURRENT DATE TO VARIABLE AND REMOVING '-' FOR REPORT DATE01359133
+           MOVE FUNCTION CURRENT-DATE TO WS-CURR-DATE                   01360027
+           STRING WS-CURR-YEAR '-' WS-CURR-MONTH '-' WS-CURR-DAY '-'    01370027
+             DELIMITED BY SIZE                                          01380027
+             INTO TO001-REPORT-DATE                                     01390027
+           END-STRING                                                   01400027
+      * MOVING DATA FROM HOST VARIABLES TO OUTPUT VARIABLES             01401033
+           MOVE HV-APPLICANT-ID TO TO001-APPLICANT-ID                   01410027
+           MOVE HV-LOAN-ID TO TO001-LOAN-ID                             01420027
+           MOVE HV-LOAN-TYPE TO TO001-LOAN-TYPE                         01430027
+           MOVE HV-NEXT-REPAYMENT-DUE-DATE TO                           01440027
+                TO001-DUE-DATE                                          01450027
+           MOVE HV-MONTHLY-REPAYMENT-AMOUNT TO                          01460027
+                TO001-MON-REP-AMT                                       01470027
+      * FORMATTING DATES FROM DATABASE TO PERFORM OPERATIONS            01471034
+           UNSTRING HV-NEXT-REPAYMENT-DUE-DATE                          01480027
+                DELIMITED BY '-'                                        01490027
+                INTO WS-DUE-YEAR, WS-DUE-MONTH, WS-DUE-DAY              01500027
+           END-UNSTRING                                                 01510027
+           UNSTRING HVP-AMOUNT-PAID-DATE                                01520027
+                DELIMITED BY '-'                                        01530027
+                INTO WS-PAID-YEAR, WS-PAID-MONTH, WS-PAID-DAY           01540027
+           END-UNSTRING                                                 01550027
+           MOVE WS-DUE-GDATE TO WS-DUE-DATE                             01560027
+           MOVE WS-PAID-GDATE TO WS-PAID-DATE                           01570027
+           DISPLAY 'DUE DATE: ' WS-DUE-DATE                             01580027
+                   'PAID DATE: ' WS-PAID-DATE                           01590027
+      * COMPUTING DAYS BETWEEN DUE DATE AND PAID DATE                   01591033
+      * BY USING INTEGER DATE FORM (NO. OF DAYS FROM 31/12/1600)        01592033
+           COMPUTE WS-DAYS = FUNCTION INTEGER-OF-DATE                   01600027
+                             (WS-DUE-DATE)                              01610027
+                                       -                                01620027
+                              FUNCTION INTEGER-OF-DATE                  01630027
+                              (WS-PAID-DATE)                            01640027
+           DISPLAY WS-DAYS                                              01650027
+           ADD 1 TO WS-COUNTER                                          01660027
+           EVALUATE TRUE                                                01670027
+           WHEN WS-DAYS > 30 AND SQLCODE = 0                            01680031
+      * IF DAYS > 30 WE UPDATE LOAN DB AND SEND REPORT TO CSV           01681033
+               PERFORM 3210-UPDATE-PARA THRU                            01690027
+               3210-UPDATE-PARA-EXIT                                    01700027
+               PERFORM 3220-CSV-PARA THRU                               01710027
+               3220-CSV-PARA-EXIT                                       01720027
+               WRITE TO001-OUTPUT-REC                                   01730027
+               WRITE TO002-OUTPUT-REC                                   01740027
+               DISPLAY 'RECORD' WS-COUNTER 'WRITTEN'                    01750027
+           WHEN OTHER                                                   01760027
+               DISPLAY 'RECORD' WS-COUNTER 'SKIPPED'                    01770027
+           END-EVALUATE                                                 01780027
+           .                                                            01790027
+       3200-FETCH-PARA-EXIT.                                            01800027
+           EXIT.                                                        01810027
+      * PARA TO PROVIDE DISCOUNT FOR EARLY PAYERS AND UPDATE DATABASE   01811033
+       3210-UPDATE-PARA.                                                01820027
+           EVALUATE TRUE                                                01830027
+           WHEN WS-DAYS > 36                                            01840027
+               DISPLAY 'BEFORE UPDATE BALANCE: ' HV-BALANCE-AMOUNT      01850027
+               COMPUTE HV-BALANCE-AMOUNT = HV-BALANCE-AMOUNT - 500      01860027
+               DISPLAY 'AFTER UPDATE BALANCE: ' HV-BALANCE-AMOUNT       01870027
+      * QUERIES TO UPDATE LOAN_DB AND PAYMENT_DB                        01871033
+               EXEC SQL                                                 01880027
+                 UPDATE LOAN_DB                                         01890027
+                 SET BALANCE_AMOUNT = :HV-BALANCE-AMOUNT                01900027
+                 WHERE APPLICANT_ID = :HV-APPLICANT-ID                  01910027
+               END-EXEC                                                 01920027
+               IF SQLCODE = 0                                           01930027
+                   DISPLAY 'LOAN_DB UPDATED'                            01940027
+               ELSE                                                     01950027
+                   DISPLAY 'LOAN_DB UPDATE FAILED'                      01960027
+               END-IF                                                   01970027
+               EXEC SQL                                                 01980027
+                 UPDATE PAYMENT_DB                                      01990027
+                 SET CURRENT_BALANCE_AMOUNT = :HV-BALANCE-AMOUNT        02000027
+                 WHERE APPLICANT_ID = :HV-APPLICANT-ID                  02010027
+               END-EXEC                                                 02020027
+               IF SQLCODE = 0                                           02030027
+                   DISPLAY 'PAYMENT_DB UPDATED'                         02040027
+               ELSE                                                     02050027
+                   DISPLAY 'PAYMENT_DB UPDATE FAILED'                   02060027
+               END-IF                                                   02070027
+           WHEN OTHER                                                   02080027
+               DISPLAY 'NOT ELIGIBLE FOR DISCOUNT'                      02090027
+           END-EVALUATE                                                 02100027
+           .                                                            02110027
+       3210-UPDATE-PARA-EXIT.                                           02120027
+           EXIT.                                                        02130027
+      * PARA TO FORMAT THE DATA INTO CSV                                02131033
+       3220-CSV-PARA.                                                   02140027
+           STRING TO001-REPORT-DATE ','                                 02150028
+                  TO001-APPLICANT-ID ','                                02160028
+                  TO001-LOAN-ID ','                                     02170027
+                  TO001-LOAN-TYPE ','                                   02180027
+                  TO001-DUE-DATE ','                                    02190027
+                  TO001-MON-REP-AMT                                     02200027
+           DELIMITED BY SPACE                                           02210027
+           INTO TO002-OUTPUT-REC                                        02220027
+           .                                                            02230027
+       3220-CSV-PARA-EXIT.                                              02240027
+           EXIT.                                                        02250027
+      * PARA TO CLOSE CURSOR AND FILES                                  02251033
+       3300-CLOSE-PARA.                                                 02260027
+           EXEC SQL                                                     02280027
+           CLOSE HLCURS                                                 02290027
+           END-EXEC                                                     02300027
+           CLOSE TO001-OUTPUT TO002-OUTPUT                              02301033
+           .                                                            02310027
+       3300-CLOSE-PARA-EXIT.                                            02320027
+           EXIT.                                                        02330027
+       9000-TERM-PARA.                                                  02340027
+           STOP RUN.                                                    02350027
+       9000-TERM-PARA-EXIT.                                             02360027
+           EXIT.                                                        02370027
+

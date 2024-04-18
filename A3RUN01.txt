@@ -1,0 +1,22 @@
+//TECN132R JOB ,,NOTIFY=&SYSUID,CLASS=A,MSGLEVEL=(1,1),MSGCLASS=H,      00010004
+//         LINES=(1,CANCEL),PRTY=15                                     00020000
+//JOBLIB  DD DISP=SHR,                                                  00030004
+//            DSN=DSN910.SDSNLOAD                                       00050004
+//         DD DISP=SHR,                                                 00060004
+//            DSN=CEE.SCEERUN                                           00070004
+//PH02CS04 EXEC PGM=IKJEFT01,DYNAMNBR=20,COND=(4,LT)                    00100000
+//SYSTSPRT DD SYSOUT=*                                                  00110000
+//SYSPRINT DD SYSOUT=*                                                  00120000
+//SYSOUT   DD SYSOUT=*                                                  00130000
+//*INBKPS   DD DSN=TECN132.INPUT.BANK.PS,DISP=SHR                       00131006
+//OUTPS1   DD DSN=TECN132.PROJECT.OUTPUT.SORT,DISP=SHR                  00132015
+//*           LIKE=TECN132.INPUT.BANK.PS,VOL=SER=ZAPRD7                 00132115
+//OUTPS2   DD DSN=TECN132.PROJECT.OUTPUT.CSV,DISP=SHR                   00133015
+//*           LIKE=TECN132.INPUT.BANK.PS,VOL=SER=ZAPRD7                 00134015
+//SYSIN    DD DUMMY                                                     00140000
+//SYSTSIN  DD *                                                         00150000
+  DSN SYSTEM(DB9G)                                                      00160003
+  RUN PROGRAM(HLCOB01) PLAN(TECN132P) LIB('TECN132.DB2.LOADLIB')        00170010
+  END                                                                   00180000
+/*                                                                      00190000
+
