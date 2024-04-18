@@ -1,0 +1,40 @@
+//TECN139A JOB NOTIFY=&SYSUID                                           00010000
+// JCLLIB ORDER=(TECN139.JCL.CC01.PDS)                                  00020000
+//STEP010  EXEC PROC=CATDSCRT,DSNNAME=TECN139.JCL.CC01                  00030000
+//STEP020  EXEC PGM=SORT                                                00040000
+//SYSPRINT DD SYSOUT=*                                                  00050000
+//SYSOUT   DD SYSOUT=*                                                  00060000
+//SORTIN   DD DSN=TECN139.JCL.CC01.PS2,DISP=SHR                         00070000
+//SORTOUT  DD DSN=TECN139.JCL.CC01.PS2,DISP=MOD                         00080000
+//SYSIN    DD *                                                         00090000
+  SORT FIELDS=COPY                                                      00100000
+  OUTFIL REMOVECC,                                                      00110000
+  HEADER1=(1:C'***EMPLOYEE SAMPLE DATA***')                             00120000
+/*                                                                      00130000
+//STEP030  EXEC PGM=IDCAMS                                              00140000
+//SYSPRINT DD SYSOUT=*                                                  00150000
+//SYSIN    DD *                                                         00160000
+  PRINT INDATASET(TECN139.JCL.CC01.PS1)CHAR-                            00170000
+  COUNT(1)                                                              00180000
+/*                                                                      00190000
+// IF (STEP030.RC EQ 4) THEN                                            00200000
+//STEP040  EXEC PGM=IEBGENER                                            00210000
+//SYSPRINT DD SYSOUT=*                                                  00220000
+//SYSIN    DD DUMMY                                                     00230000
+//SYSUT1   DD *                                                         00240000
+INPUT DATASET IS EMPTY                                                  00250000
+/*                                                                      00260000
+//SYSUT2   DD SYSOUT=*                                                  00270000
+// ENDIF                                                                00280000
+// IF (STEP030.RC EQ 0) THEN                                            00290000
+//STEP050  EXEC PGM=IDCAMS                                              00300000
+//SYSPRINT DD SYSOUT=*                                                  00310000
+//DD9      DD DSN=TECN139.JCL.CC01.PS1,DISP=SHR                         00320000
+//DD10     DD DSN=TECN139.JCL.CC01.PS2,DISP=MOD                         00330000
+//SYSIN    DD *                                                         00340000
+  REPRO INFILE(DD9)-                                                    00350000
+  OUTFILE(DD10)-                                                        00360000
+  SKIP(1)-                                                              00370000
+  COUNT(2)                                                              00380000
+/*                                                                      00390000
+// ENDIF                                                                00400000

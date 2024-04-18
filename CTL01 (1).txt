@@ -1,0 +1,8 @@
+  DEFINE CLUSTER( -                                                     00010001
+  NAME(TECN139.VSAM.CC01.KSDS) -                                        00020001
+  CISZ(512) -                                                           00030001
+  RECORDSIZE(80,80) -                                                   00040001
+  VOLUME(ZAPRD4) -                                                      00050001
+  TRACK(2,2) -                                                          00060001
+  KEYS(5,0) -                                                           00070001
+  INDEXED)                                                              00080001

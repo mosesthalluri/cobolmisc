@@ -1,0 +1,4 @@
+  SORT FIELDS=COPY                                                      00010000
+  OUTFIL FILES=1,INCLUDE=(5,1,CH,EQ,C'L')                               00020000
+  OUTFIL FILES=2,INCLUDE=(5,1,CH,EQ,C'H')                               00030000
+

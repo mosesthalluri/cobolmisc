@@ -1,0 +1,29 @@
+//TECN121A JOB  NOTIFY=&SYSUID                                          00010000
+//PROCLOC  JCLLIB ORDER=TECN121.VSAM.CC01.PDS                           00011000
+//STEP010  EXEC PROC=KSDSCRT                                            00020000
+//STEP020  EXEC PGM=SORT                                                00030000
+//SYSPRINT DD   SYSOUT=*                                                00040000
+//SYSOUT   DD   SYSOUT=*                                                00050000
+//SORTIN   DD   DSN=TECN121.VSAM.CC01.PS1,DISP=SHR                      00060000
+//SORTOUT  DD   DSN=TECN121.VSAM.CC01.PS99,DISP=(NEW,CATLG,DELETE),     00070000
+//         LIKE=TECN121.VSAM.CC01.PS1                                   00080000
+//SYSIN    DD   *                                                       00090000
+  SORT FIELDS=(1,5,CH,A)                                                00100000
+/*                                                                      00110000
+//STEP030  EXEC PGM=IDCAMS                                              00120000
+//SYSPRINT DD   SYSOUT=*                                                00130000
+//SYSOUT   DD   SYSOUT=*                                                00140000
+//SYSIN    DD   *                                                       00150000
+  REPRO INDATASET(TECN121.VSAM.CC01.PS99) -                             00160000
+        OUTDATASET(TECN121.VSAM.CC01.KSDS)                              00170000
+/*                                                                      00180000
+//STEP040  EXEC PGM=IDCAMS                                              00190000
+//SYSPRINT DD   SYSOUT=*                                                00200000
+//SYSOUT   DD   SYSOUT=*                                                00210000
+//DD1      DD   DSN=TECN121.VSAM.CC01.PS2,DISP=(NEW,CATLG,DELETE),      00220000
+//         LIKE=TECN121.VSAM.CC01.PS1                                   00221000
+//SYSIN    DD   *                                                       00230000
+  REPRO INDATASET(TECN121.VSAM.CC01.KSDS) OUTFILE(DD1) -                00240000
+  SKIP(2) -                                                             00250000
+  COUNT(2)                                                              00260000
+/*                                                                      00270000

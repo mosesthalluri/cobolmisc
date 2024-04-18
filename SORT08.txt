@@ -1,0 +1,18 @@
+//TECN246A JOB (DEV),'NIKHIL',CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1),        00010002
+//          NOTIFY=&SYSUID                                              00011002
+//STEP1    EXEC PGM=SORT                                                00020002
+//SYSOUT   DD SYSOUT=*                                                  00021002
+//SYSPRINT DD SYSOUT=*                                                  00030003
+//SORTIN   DD DSN=TECN246.EMPREC.PS1,DISP=SHR                           00050002
+//SORTOUT  DD DSN=TECN246.EMP.DET.REPORT,                               00060004
+//            DISP=(NEW,CATLG,DELETE),                                  00070002
+//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=800),                      00080002
+//            SPACE=(TRK,(1,1))                                         00090002
+//SYSIN    DD *                                                         00100002
+  SORT FIELDS=(20,2,CH,A)                                               00110002
+  OUTFIL REMOVECC,                                                      00120003
+         HEADER1=(26:C'EMPLOYEE DETAILS'),                              00130004
+         HEADER2=(80C'*'),                                              00140003
+         TRAILER2=(80C'*'),                                             00150003
+         TRAILER1=(2:C'TOTAL SALARY:',24:TOT=(23,6,ZD,TO=ZD,LENGTH=6))  00160004
+/*                                                                      00170004

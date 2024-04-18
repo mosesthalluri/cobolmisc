@@ -1,0 +1,29 @@
+//TECN139A JOB NOTIFY=&SYSUID                                           00010001
+//         JCLLIB ORDER=TECN139.VSAM.CC01.PDS                           00020001
+//STEP010  EXEC PROC=KSDSCRT                                            00030002
+//STEO020  EXEC PGM=SORT                                                00040001
+//SORTIN   DD DSN=TECN139.VSAM.CC01.PS1,DISP=SHR                        00050001
+//SORTOUT  DD DSN=TECN139.VSAM.CC01.PS1,DISP=SHR                        00060001
+//SYSPRINT DD SYSOUT=*                                                  00070001
+//SYSOUT   DD SYSOUT=*                                                  00080001
+//SYSIN    DD *                                                         00090001
+  SORT FIELDS=(1,5,CH,A)                                                00100004
+/*                                                                      00110001
+//STEP030  EXEC PGM=IDCAMS                                              00120001
+//SYSPRINT DD SYSOUT=*                                                  00130001
+//SYSOUT   DD SYSOUT=*                                                  00140001
+//SYSIN    DD *                                                         00150001
+  REPRO INDATASET(TECN139.VSAM.CC01.PS1) -                              00160001
+        OUTDATASET(TECN139.VSAM.CC01.KSDS)                              00170005
+/*                                                                      00180001
+//STEP040  EXEC PGM=IDCAMS                                              00190004
+//DD1      DD DSN=TECN139.VSAM.CC01.PS2,                                00200005
+//         DISP=(NEW,CATLG,DELETE),                                     00210004
+//         LIKE=TECN139.VSAM.CC01.PS1                                   00220005
+//SYSPRINT DD SYSOUT=*                                                  00250001
+//SYSOUT   DD SYSOUT=*                                                  00260001
+//SYSIN    DD *                                                         00270001
+  REPRO INDATASET(TECN139.VSAM.CC01.KSDS) -                             00280005
+  OUTFILE(DD1) -                                                        00290005
+  FROMKEY(33333) TOKEY(44444)                                           00291004
+/*                                                                      00300001

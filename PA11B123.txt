@@ -1,0 +1,79 @@
+//PA11B123 PROC                                                         00010000
+//STEP005  EXEC PGM=IEFBR14                                             00020000
+//DD1      DD   DSN=&DSNAME..PS2,DISP=(MOD,DELETE,DELETE),              00030001
+//         SPACE=(TRK,(1,1))                                            00030101
+//DD2      DD   DSN=&DSNAME..PS3,DISP=(MOD,DELETE,DELETE),              00030201
+//         SPACE=(TRK,(1,1))                                            00030301
+//DD3      DD   DSN=&DSNAME..PS4,DISP=(MOD,DELETE,DELETE),              00030401
+//         SPACE=(TRK,(1,1))                                            00030501
+//DD4      DD   DSN=&DSNAME..PS5,DISP=(MOD,DELETE,DELETE),              00030601
+//         SPACE=(TRK,(1,1))                                            00030701
+//DD5      DD   DSN=&DSNAME..PS6,DISP=(MOD,DELETE,DELETE),              00030801
+//         SPACE=(TRK,(1,1))                                            00030901
+//DD6      DD   DSN=&DSNAME..PS7,DISP=(MOD,DELETE,DELETE),              00031001
+//         SPACE=(TRK,(1,1))                                            00032001
+//DD7      DD   DSN=&DSNAME..LOWDOS,DISP=(MOD,DELETE,DELETE),           00040002
+//         SPACE=(TRK,(1,1))                                            00050000
+//DD8      DD   DSN=&DSNAME..HIGHDOS,DISP=(MOD,DELETE,DELETE),          00060002
+//         SPACE=(TRK,(1,1))                                            00070000
+//STEP010  EXEC PGM=SORT                                                00080000
+//SYSPRINT DD   SYSOUT=*                                                00090000
+//SYSOUT   DD   SYSOUT=*                                                00100002
+//SORTIN   DD   DSN=&DSNAME..PS1,DISP=SHR                               00110000
+//SORTOUT  DD   DSN=&DSNAME..PS2,DISP=(NEW,CATLG,DELETE),               00120000
+//         LIKE=&DSNAME..PS1                                            00130000
+//SYSIN    DD   DSN=&DSNAME..PDS(CC11B123),DISP=SHR                     00140000
+//STEP020  EXEC PGM=SORT                                                00150000
+//SYSPRINT DD   SYSOUT=*                                                00160000
+//SYSOUT   DD   SYSOUT=*                                                00170000
+//SORTIN   DD   DSN=&DSNAME..PS2,DISP=SHR                               00180000
+//SORTOUT  DD   DSN=&DSNAME..PS2,DISP=SHR                               00190000
+//SYSIN    DD   DSN=&DSNAME..PDS(CC21B123),DISP=SHR                     00200000
+//STEP030  EXEC PGM=SORT                                                00210000
+//SYSPRINT DD   SYSOUT=*                                                00220000
+//SYSOUT   DD   SYSOUT=*                                                00230000
+//SORTIN   DD   DSN=&DSNAME..PS2,DISP=SHR                               00240000
+//SORTOF1  DD   DSN=&DSNAME..LOWDOS,DISP=(NEW,CATLG,DELETE),            00250000
+//         LIKE=&DSNAME..PS2                                            00260000
+//SORTOF2  DD   DSN=&DSNAME..HIGHDOS,DISP=(NEW,CATLG,DELETE),           00261000
+//         LIKE=&DSNAME..PS2                                            00262000
+//SYSIN    DD   DSN=&DSNAME..PDS(CC31B123),DISP=SHR                     00270000
+//STEP040  EXEC PGM=SORT                                                00280000
+//SYSPRINT DD   SYSOUT=*                                                00290000
+//SYSOUT   DD   SYSOUT=*                                                00300000
+//SORTIN1  DD   DSN=&DSNAME..LOWDOS,DISP=SHR                            00310000
+//SORTIN2  DD   DSN=&DSNAME..HIGHDOS,DISP=SHR                           00320000
+//SORTOUT  DD   DSN=&DSNAME..PS3,DISP=(NEW,CATLG,DELETE),               00330000
+//         LIKE=&DSNAME..PS2                                            00340000
+//SYSIN    DD   DSN=&DSNAME..PDS(CC41B123),DISP=SHR                     00350000
+//STEP050  EXEC PGM=SORT                                                00360000
+//SYSPRINT DD   SYSOUT=*                                                00370000
+//SYSOUT   DD   SYSOUT=*                                                00380002
+//SORTIN   DD   DSN=&DSNAME..PS3,DISP=SHR                               00390000
+//SORTOUT  DD   DSN=&DSNAME..PS4,DISP=(NEW,CATLG,DELETE),               00400000
+//         LIKE=&DSNAME..PS2                                            00410000
+//SYSIN    DD   DSN=&DSNAME..PDS(CC51B123),DISP=SHR                     00420000
+//STEP060  EXEC PGM=IDCAMS                                              00430000
+//SYSPRINT DD   SYSOUT=*                                                00440000
+//SYSOUT   DD   SYSOUT=*                                                00450000
+//SYSIN    DD   DSN=&DSNAME..PDS(CC61B123),DISP=SHR                     00460000
+// IF (STEP060.RC EQ 0) THEN                                            00470000
+//STEP070  EXEC PGM=SORT                                                00480000
+//SYSPRINT DD   SYSOUT=*                                                00490000
+//SYSOUT   DD   SYSOUT=*                                                00500000
+//SORTIN   DD   DSN=&DSNAME..PS4,DISP=SHR                               00510000
+//SORTOUT  DD   DSN=&DSNAME..PS5,DISP=(NEW,CATLG,DELETE),               00520002
+//         LIKE=&DSNAME..PS4                                            00530000
+//SYSIN    DD   DSN=&DSNAME..PDS(CC71B123),DISP=SHR                     00540000
+// ENDIF                                                                00550000
+// IF (STEP060.RC EQ 4) THEN                                            00560000
+//STEP080  EXEC PGM=SORT                                                00570000
+//SYSPRINT DD   SYSOUT=*                                                00580000
+//SYSOUT   DD   SYSOUT=*                                                00590000
+//SORTIN   DD   DSN=&DSNAME..PS2,DISP=SHR                               00600000
+//SORTOUT  DD   DSN=&DSNAME..PS6,DISP=(NEW,CATLG,DELETE),               00610000
+//         LIKE=&DSNAME..PS2                                            00620000
+//SYSIN    DD   DSN=&DSNAME..PDS(CC81B123),DISP=SHR                     00630000
+// ENDIF                                                                00640000
+//         PEND                                                         00650000
+

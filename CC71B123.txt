@@ -1,0 +1,4 @@
+  SORT FIELDS=COPY                                                      00010000
+  OUTREC IFTHEN=(WHEN=(8,3,ZD,LT,100),                                  00020002
+                 OVERLAY=(8:8,3,ZD,ADD,+050,EDIT=(TTT)))                00030002
+

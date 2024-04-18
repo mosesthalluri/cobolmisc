@@ -1,0 +1,6 @@
+//KSDSCRT  PROC                                                         00010001
+//STEO001  EXEC PGM=IDCAMS                                              00020001
+//SYSPRINT DD SYSOUT=*                                                  00030001
+//SYSOUT   DD SYSOUT=*                                                  00040001
+//SYSIN    DD DSN=TECN139.VSAM.CC01.PDS(CTL01),DISP=SHR                 00050001
+//         PEND                                                         00060001

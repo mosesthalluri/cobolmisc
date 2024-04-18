@@ -1,0 +1,5 @@
+33333 MUM EXPRESS     MUM   CHN                                         00000100
+22222 KER EXPRESS     ERK   SLM                                         00000200
+11111 LOKMANYA        DEL   PUN                                         00000300
+55555 SATHAPTHI       HYD   CHN                                         00000400
+44444 INTERCITY       BLR   CBE                                         00000500

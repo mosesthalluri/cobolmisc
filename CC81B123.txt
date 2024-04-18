@@ -1,0 +1,4 @@
+  SORT FIELDS=COPY                                                      00010000
+  INCLUDE COND=(12,7,CH,EQ,C'NOT-EXP')                                  00020000
+  OUTREC OVERLAY=(15:C' ')                                              00030000
+

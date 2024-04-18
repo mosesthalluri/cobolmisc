@@ -1,0 +1,40 @@
+//TECN132V JOB NOTIFY=&SYSUID                                           00010000
+//PROLOC JCLLIB ORDER=TECN132.JCL.MYPROC                                00020000
+//STEP010 EXEC PROC=KSDSCRT                                             00030001
+//STEP020 EXEC PGM=IDCAMS                                               00040002
+//SYSPRINT DD SYSOUT=*                                                  00050002
+//SYSOUT DD SYSOUT=*                                                    00060002
+//SYSIN DD *                                                            00070002
+  PRINT INDATASET(TECN132.JCL.ASSMT01.STUD.PS2) CHAR-                   00080002
+        COUNT(1)                                                        00090002
+/*                                                                      00091003
+// IF (STEP020.RC EQ 0) THEN                                            00092003
+//STEP030 EXEC PGM=IDCAMS                                               00100003
+//SYSPRINT DD SYSOUT=*                                                  00110003
+//SYSOUT DD SYSOUT=*                                                    00120003
+//SYSIN DD *                                                            00130003
+  REPRO INDATASET(TECN132.JCL.ASSMT01.STUD.PS2) -                       00140003
+        OUTDATASET(TECN132.JCL.ASSMT01.STUD.KSDS)                       00150003
+/*                                                                      00160003
+// ENDIF                                                                00170003
+// IF (STEP020.RC EQ 4) THEN                                            00171003
+//STEP040 EXEC PGM=IEBGENER                                             00180003
+//SYSUT1 DD *                                                           00190003
+  DATASET IS EMPTY                                                      00191003
+/*                                                                      00192003
+//SYSUT2 DD SYSOUT=*                                                    00200003
+//SYSPRINT DD SYSOUT=*                                                  00210003
+//SYSIN DD DUMMY                                                        00211003
+/*                                                                      00220003
+// ENDIF                                                                00230003
+//STEP050 EXEC PGM=IDCAMS                                               00240003
+//SYSPRINT DD SYSOUT=*                                                  00250003
+//SYSOUT DD SYSOUT=*                                                    00260003
+//SYSIN DD *                                                            00270003
+  DEFINE AIX(NAME(TECN132.JCL.ASSMT01.STUD.AIX) -                       00280003
+         RELATE(TECN132.JCL.ASSMT01.STUD.KSDS) -                        00290003
+         CISZ(512)-                                                     00300003
+         KEYS(20,7)-                                                    00310003
+         NONUNIQUEKEY                                                   00320003
+/*                                                                      00330003
+

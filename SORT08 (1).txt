@@ -1,0 +1,16 @@
+//TECN132M JOB NOTIFY=&SYSUID                                           00010001
+//STEP1    EXEC PGM=SORT                                                00020001
+//SORTIN   DD DSN=TECN132.EMPREC.PS1,DISP=SHR                           00030001
+//SORTOUT  DD DSN=TECN132.EMP.DET.REPORT,DISP=(SHR,CATLG,DELETE),       00040005
+//            LIKE=TECN132.EMPREC.PS1                                   00050001
+//SYSPRINT DD SYSOUT=*                                                  00060001
+//SYSOUT   DD SYSOUT=*                                                  00070001
+//SYSIN    DD *                                                         00080001
+    SORT FIELDS=(20,2,CH,A,1,6,CH,A,8,11,CH,D)                          00090005
+    SUM FIELDS=NONE                                                     00091003
+    OUTFIL REMOVECC,                                                    00100003
+    HEADER1=(26:C'EMPLOYEE DETAILS',/,72C'*'),                          00110005
+    TRAILER1=(1:72C'*',/,2:C'TOTAL SALARY:',                            00130005
+    24:TOT=(23,6,ZD,EDIT=(IIIIIT)))                                     00131002
+/*                                                                      00140001
+

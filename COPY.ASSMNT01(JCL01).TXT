@@ -1,0 +1,101 @@
+//TECN132A JOB NOTIFY=&SYSUID                                           00010001
+//DSCRT PROC                                                            00020001
+//STEP001 EXEC PGM=IEFBR14                                              00030001
+//DD1 DD DSN=&DSNNAME..PS2,                                             00040001
+//       DISP=(MOD,DELETE,DELETE),                                      00050001
+//       SPACE=(TRK,(1,1))                                              00060001
+//DD2 DD DSN=&DSNNAME..PS3,                                             00061001
+//       DISP=(MOD,DELETE,DELETE),                                      00062001
+//       SPACE=(TRK,(1,1))                                              00063001
+//DD3 DD DSN=&DSNNAME..PS4,                                             00064001
+//       DISP=(MOD,DELETE,DELETE),                                      00065001
+//       SPACE=(TRK,(1,1))                                              00066001
+//DD4 DD DSN=&DSNNAME..PS5,                                             00067001
+//       DISP=(MOD,DELETE,DELETE),                                      00068001
+//       SPACE=(TRK,(1,1))                                              00069001
+//DD5 DD DSN=&DSNNAME..PS6,                                             00069101
+//       DISP=(MOD,DELETE,DELETE),                                      00069201
+//       SPACE=(TRK,(1,1))                                              00069301
+//DD6 DD DSN=&DSNNAME..PS7,                                             00069401
+//       DISP=(MOD,DELETE,DELETE),                                      00069501
+//       SPACE=(TRK,(1,1))                                              00069601
+//STEP002 EXEC PGM=IEFBR14                                              00070001
+//DD1 DD DSN=&DSNNAME..PS2,                                             00080001
+//       DISP=(NEW,CATLG,DELETE),                                       00090001
+//       LIKE=TECN132.JCL.ASSMT01.STUD.PS1                              00100001
+//DD2 DD DSN=&DSNNAME..PS3,                                             00101001
+//       DISP=(NEW,CATLG,DELETE),                                       00102001
+//       LIKE=TECN132.JCL.ASSMT01.STUD.PS1                              00103001
+//DD3 DD DSN=&DSNNAME..PS4,                                             00104001
+//       DISP=(NEW,CATLG,DELETE),                                       00105001
+//       LIKE=TECN132.JCL.ASSMT01.STUD.PS1                              00106001
+//DD4 DD DSN=&DSNNAME..PS5,                                             00107001
+//       DISP=(NEW,CATLG,DELETE),                                       00108001
+//       LIKE=TECN132.JCL.ASSMT01.STUD.PS1                              00109001
+//DD5 DD DSN=&DSNNAME..PS6,                                             00109101
+//       DISP=(NEW,CATLG,DELETE),                                       00109201
+//       LIKE=TECN132.JCL.ASSMT01.STUD.PS1                              00109301
+//DD6 DD DSN=&DSNNAME..PS7,                                             00109401
+//       DISP=(NEW,CATLG,DELETE),                                       00109501
+//       LIKE=TECN132.JCL.ASSMT01.STUD.PS1                              00109601
+// PEND                                                                 00110001
+//STEP003 EXEC PROC=DSCRT,DSNNAME=TECN132.JCL.ASSMT01.STUD              00120001
+//STEP010 EXEC PGM=SORT                                                 00130002
+//SORTIN  DD DSN=TECN132.JCL.ASSMT01.STUD.PS1,DISP=OLD                  00140002
+//SORTOUT DD DSN=TECN132.JCL.ASSMT01.STUD.PS2,DISP=SHR                  00150002
+//SYSPRINT DD SYSOUT=*                                                  00160002
+//SYSOUT   DD SYSOUT=*                                                  00170002
+//SYSIN    DD *                                                         00180002
+  SORT FIELDS=(1,6,ZD,A)                                                00190002
+  OMIT COND=(36,1,CH,EQ,C' ')                                           00200002
+  INCLUDE COND=(54,3,ZD,GT,150)                                         00210002
+/*                                                                      00220002
+//STEP020 EXEC PGM=SORT                                                 00230002
+//SORTIN DD DSN=TECN132.JCL.ASSMT01.STUD.PS1,DISP=OLD                   00240002
+//SORTOF01 DD DSN=TECN132.JCL.ASSMT01.STUD.PS3,DISP=SHR                 00250003
+//SORTOF02 DD DSN=TECN132.JCL.ASSMT01.STUD.PS4,DISP=SHR                 00260003
+//SYSPRINT DD SYSOUT=*                                                  00270003
+//SYSOUT DD SYSOUT=*                                                    00280003
+//SYSIN DD *                                                            00290003
+  SORT FIELDS=(1,6,ZD,A)                                                00300004
+  OUTFIL FILES=01,INCLUDE=(29,1,CH,EQ,C'M')                             00310004
+  OUTFIL FILES=02,INCLUDE=(29,1,CH,EQ,C'F')                             00320004
+/*                                                                      00330004
+//STEP030 EXEC PGM=SORT                                                 00340005
+//SORTIN DD DSN=TECN132.JCL.ASSMT01.STUD.PS2,DISP=OLD                   00350009
+//SORTOUT DD DSN=TECN132.JCL.ASSMT01.STUD.PS5,DISP=SHR                  00360005
+//SYSPRINT DD SYSOUT=*                                                  00370005
+//SYSOUT   DD SYSOUT=*                                                  00380005
+//SYSIN    DD *                                                         00390005
+  SORT FIELDS=(1,6,ZD,A)                                                00400009
+  OUTREC IFTHEN=(WHEN=(54,3,ZD,GT,200),                                 00410006
+         OVERLAY=(58:C'A')),                                            00420006
+         IFTHEN=(WHEN=(54,3,ZD,GT,190,AND,54,3,ZD,LT,200),              00430006
+         OVERLAY=(58:C'B')),                                            00440006
+         IFTHEN=(WHEN=(54,3,ZD,LT,190),                                 00450006
+         OVERLAY=(58:C'C'))                                             00460006
+/*                                                                      00480006
+//STEP040 EXEC PGM=SORT                                                 00490006
+//SORTIN DD DSN=TECN132.JCL.ASSMT01.STUD.PS5,DISP=OLD                   00500006
+//SORTOUT DD DSN=TECN132.JCL.ASSMT01.STUD.PS6,DISP=SHR                  00510006
+//SYSOUT DD SYSOUT=*                                                    00520006
+//SYSPRINT DD SYSOUT=*                                                  00530006
+//SYSIN DD *                                                            00540006
+  SORT FIELDS=COPY                                                      00550006
+  OUTFIL REMOVECC,                                                      00551006
+  HEADER1=(12:C'***STUDENT DETAILS***'),                                00560006
+  TRAILER1=(2:C'NO OF RECORDS:',17:COUNT=(M11,LENGTH=4))                00570006
+/*                                                                      00580008
+//STEP050  EXEC PGM=SORT                                                00590006
+//SORTIN DD DSN=TECN132.JCL.ASSMT01.STUD.PS2,DISP=OLD                   00600006
+//SORTOUT DD DSN=TECN132.JCL.ASSMT01.STUD.PS7,DISP=SHR                  00610006
+//SYSPRINT DD SYSOUT=*                                                  00620006
+//SYSOUT   DD SYSOUT=*                                                  00630006
+//SYSIN DD *                                                            00640006
+  SORT FIELDS=COPY                                                      00650006
+  OUTREC IFTHEN=(WHEN=(29,1,CH,EQ,C'M'),                                00660006
+         OVERLAY=(29:C'MALE')),                                         00670008
+         IFTHEN=(WHEN=(29,1,CH,EQ,C'F'),                                00680006
+         OVERLAY=(29:C'FEMALE'))                                        00690008
+/*                                                                      00700006
+
